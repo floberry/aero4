@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>틀리면 줄이 끊어진다! 등속원운동 퀴즈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #c7d2fe 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: #312e81;
+            font-size: 2rem;
+        }
+
+        .btn-new {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-new:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+
+        .problem-box {
+            background: linear-gradient(135deg, #eef2ff 0%, #dbeafe 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid #c7d2fe;
+            margin-bottom: 2rem;
+        }
+
+        .problem-box h2 {
+            color: #312e81;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-text {
+            color: #1f2937;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .highlight {
+            color: #4f46e5;
+            font-weight: bold;
+        }
+
+        .diagram-box {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hint-box {
+            background: #dbeafe;
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 1.5rem;
+        }
+
+        .hint-box p {
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .answer-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            color: #374151;
+            font-weight: 500;
+            font-size: 1.1rem;
+            min-width: 200px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-group input.correct {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+
+        .input-group input.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .btn-check {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-check:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .feedback.correct {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+        }
+
+        .feedback h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .feedback.correct h3 {
+            color: #065f46;
+        }
+
+        .feedback.incorrect h3 {
+            color: #991b1b;
+        }
+
+        .solution-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .solution-box p {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .solution-steps {
+            margin-left: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .solution-steps p {
+            color: #374151;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .key-point {
+            background: #fef3c7;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid #fbbf24;
+            margin-top: 1rem;
+        }
+
+        .key-point p {
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .broken-string {
+            stroke-dasharray: 5, 5;
+            animation: break 0.5s ease-out;
+        }
+
+        @keyframes break {
+            0% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>틀리면 줄이 끊어진다! 등속원운동 퀴즈</h1>
+            <button class="btn-new" onclick="newProblem()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                </svg>
+                새 문제
+            </button>
+        </div>
+
+        <div class="problem-box">
+            <h2>문제</h2>
+            <p class="problem-text">
+                그림과 같이 마찰이 없는 수평면(책상) 위에서 
+                <span class="highlight" id="mass-display"></span>의 물체가 
+                반지름 <span class="highlight" id="radius-display"></span>인 원을 그리며 
+                <span class="highlight" id="speed-display"></span>의 일정한 속력으로 등속원운동을 하고 있습니다.
+            </p>
+            <p class="problem-text">
+                물체는 책상 중앙의 구멍을 통과한 줄로 연결되어 있으며, 줄 아래에는 추가 매달려 있습니다.
+                이때 추의 질량은 얼마입니까? 
+                <span style="font-size: 0.9rem; color: #6b7280;">(중력가속도 g = 10 m/s²)</span>
+            </p>
+        </div>
+
+        <div class="diagram-box">
+            <svg id="animation-svg" width="500" height="420" viewBox="0 0 500 420">
+                <!-- 위에서 본 모습 레이블 -->
+                <text x="120" y="30" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="bold">위에서 본 모습</text>
+                <rect x="20" y="35" width="200" height="3" fill="#cbd5e1"/>
+                
+                <!-- 위에서 본 모습: 책상 -->
+                <rect x="20" y="50" width="200" height="200" fill="#d4a574" stroke="#8b4513" stroke-width="3" rx="5"/>
+                
+                <!-- 책상 중앙 구멍 -->
+                <circle cx="120" cy="150" r="8" fill="#333"/>
+                
+                <!-- 원운동 경로 -->
+                <circle cx="120" cy="150" r="80" fill="none" stroke="#4f46e5" stroke-width="3" stroke-dasharray="8,4"/>
+                
+                <!-- 반지름 -->
+                <line id="radius-line" x1="120" y1="150" x2="200" y2="150" stroke="#4f46e5" stroke-width="2"/>
+                <text x="160" y="143" fill="#4f46e5" font-size="13" font-weight="bold" id="radius-label"></text>
+                
+                <!-- 줄 (위에서 본 모습) -->
+                <line id="string-top" x1="120" y1="150" x2="200" y2="150" stroke="#6b7280" stroke-width="2"/>
+                
+                <!-- 회전하는 물체 -->
+                <circle id="object-top" cx="200" cy="150" r="12" fill="#ef4444" stroke="#dc2626" stroke-width="2"/>
+                <text id="object-text-top" x="200" y="154" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">m</text>
+                
+                <!-- 측면도 레이블 -->
+                <text x="360" y="30" text-anchor="middle" fill="#1f2937" font-size="14" font-weight="bold">측면도</text>
+                <rect x="260" y="35" width="200" height="3" fill="#cbd5e1"/>
+                
+                <!-- 측면도: 책상 -->
+                <rect x="260" y="150" width="200" height="25" fill="#8b4513" stroke="#654321" stroke-width="2"/>
+                <rect x="260" y="175" width="200" height="12" fill="#a0522d" stroke="#654321" stroke-width="1"/>
+                
+                <!-- 책상 다리 -->
+                <rect x="280" y="187" width="12" height="80" fill="#654321"/>
+                <rect x="428" y="187" width="12" height="80" fill="#654321"/>
+                
+                <!-- 중앙 구멍 -->
+                <ellipse cx="360" cy="162" rx="8" ry="4" fill="#333"/>
+                
+                <!-- 책상 표면 레이블 -->
+                <text x="360" y="143" text-anchor="middle" fill="#654321" font-size="10">마찰 없는 수평면</text>
+                
+                <!-- 줄이 구멍 아래로 -->
+                <line id="string-side" x1="360" y1="175" x2="360" y2="290" stroke="#6b7280" stroke-width="2" stroke-dasharray="4,4"/>
+                
+                <!-- 추 -->
+                <rect x="345" y="290" width="30" height="40" fill="#f59e0b" stroke="#d97706" stroke-width="2" rx="2"/>
+                <text x="360" y="315" text-anchor="middle" fill="#fff" font-size="15" font-weight="bold">M</text>
+                
+                <!-- 책상 위 물체 표시 (측면도) -->
+                <circle cx="410" cy="162" r="10" fill="#ef4444" stroke="#dc2626" stroke-width="2"/>
+                <text x="410" y="166" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">m</text>
+                
+                <!-- 줄 (책상 위) -->
+                <line id="string-side-top" x1="360" y1="162" x2="400" y2="162" stroke="#6b7280" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <div class="hint-box">
+            <p>💡 <strong>힌트:</strong> 물체가 수평면 위에서 등속원운동을 하려면 구심력이 필요합니다. 
+            이 구심력은 줄의 장력 T가 제공합니다. 
+            줄 아래에 매달린 추의 무게 Mg도 장력 T와 같습니다. (추가 정지해 있으므로)</p>
+        </div>
+
+        <div class="answer-section">
+            <div class="input-group">
+                <label>추의 질량 (kg):</label>
+                <input type="number" step="0.1" id="answer-input" placeholder="답을 입력하세요">
+            </div>
+        </div>
+
+        <button class="btn-check" onclick="checkAnswer()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            정답 확인
+        </button>
+
+        <div id="feedback" class="feedback hidden"></div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        let animationId = null;
+        let angle = 0;
+        let isChecked = false; // 정답 확인 여부
+
+        function generateProblem() {
+            // 암산 가능한 자연수 값들
+            const mass = Math.floor(Math.random() * 5) + 1; // 1~5 kg
+            const radius = Math.floor(Math.random() * 5) + 1; // 1~5 m
+            const speed = Math.floor(Math.random() * 8) + 2; // 2~9 m/s
+            const g = 10;
+            
+            const centripetalForce = (mass * speed * speed) / radius;
+            const counterMass = (mass * speed * speed) / (radius * g);
+            
+            return {
+                mass: mass,
+                radius: radius,
+                speed: speed,
+                g: g,
+                centripetalForce: centripetalForce.toFixed(2),
+                counterMass: counterMass.toFixed(2)
+            };
+        }
+
+        function newProblem() {
+            currentProblem = generateProblem();
+            
+            document.getElementById('mass-display').textContent = currentProblem.mass + ' kg';
+            document.getElementById('radius-display').textContent = currentProblem.radius + ' m';
+            document.getElementById('speed-display').textContent = currentProblem.speed + ' m/s';
+            document.getElementById('radius-label').textContent = 'r = ' + currentProblem.radius + 'm';
+            
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').className = '';
+            document.getElementById('feedback').className = 'feedback hidden';
+            
+            // 애니메이션 중지 및 초기화
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            isChecked = false;
+            resetDiagram();
+            // 새 문제에서는 즉시 원운동 시작
+            animateCircularMotion();
+        }
+
+        function resetDiagram() {
+            angle = 0;
+            const centerX = 120;
+            const centerY = 150;
+            const radius = 80;
+            
+            // 초기 위치로 리셋
+            const object = document.getElementById('object-top');
+            const objectText = document.getElementById('object-text-top');
+            const stringTop = document.getElementById('string-top');
+            
+            object.setAttribute('cx', centerX + radius);
+            object.setAttribute('cy', centerY);
+            objectText.setAttribute('x', centerX + radius);
+            objectText.setAttribute('y', centerY + 4);
+            
+            stringTop.setAttribute('x2', centerX + radius);
+            stringTop.setAttribute('y2', centerY);
+            stringTop.setAttribute('stroke', '#6b7280');
+            stringTop.setAttribute('stroke-dasharray', '0');
+            stringTop.classList.remove('broken-string');
+        }
+
+        function animateCircularMotion() {
+            const centerX = 120;
+            const centerY = 150;
+            const radius = 80;
+            
+            angle += 0.03; // 회전 속도
+            
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            
+            const object = document.getElementById('object-top');
+            const objectText = document.getElementById('object-text-top');
+            const stringTop = document.getElementById('string-top');
+            
+            object.setAttribute('cx', x);
+            object.setAttribute('cy', y);
+            objectText.setAttribute('x', x);
+            objectText.setAttribute('y', y + 4);
+            
+            stringTop.setAttribute('x2', x);
+            stringTop.setAttribute('y2', y);
+            
+            animationId = requestAnimationFrame(animateCircularMotion);
+        }
+
+        function animateStringBreak() {
+            const centerX = 120;
+            const centerY = 150;
+            const radius = 80;
+            
+            // 현재 위치에서 접선 방향 계산
+            const currentX = parseFloat(document.getElementById('object-top').getAttribute('cx'));
+            const currentY = parseFloat(document.getElementById('object-top').getAttribute('cy'));
+            
+            // 접선 방향 벡터 (속도 방향)
+            const tangentX = -(currentY - centerY);
+            const tangentY = (currentX - centerX);
+            const magnitude = Math.sqrt(tangentX * tangentX + tangentY * tangentY);
+            const normalizedTangentX = tangentX / magnitude;
+            const normalizedTangentY = tangentY / magnitude;
+            
+            // 줄 끊어지는 효과
+            const stringTop = document.getElementById('string-top');
+            stringTop.classList.add('broken-string');
+            stringTop.setAttribute('stroke', '#ef4444');
+            
+            let time = 0;
+            const speed = 3; // 직선 운동 속도
+            
+            function moveLinear() {
+                time += 1;
+                
+                const newX = currentX + normalizedTangentX * speed * time;
+                const newY = currentY + normalizedTangentY * speed * time;
+                
+                const object = document.getElementById('object-top');
+                const objectText = document.getElementById('object-text-top');
+                
+                object.setAttribute('cx', newX);
+                object.setAttribute('cy', newY);
+                objectText.setAttribute('x', newX);
+                objectText.setAttribute('y', newY + 4);
+                
+                // 화면 밖으로 나가면 정지
+                if (newX < 0 || newX > 220 || newY < 0 || newY > 250) {
+                    return;
+                }
+                
+                animationId = requestAnimationFrame(moveLinear);
+            }
+            
+            moveLinear();
+        }
+
+        function checkAnswer() {
+            // 이미 확인했으면 무시
+            if (isChecked) return;
+            
+            isChecked = true;
+            
+            const userAnswer = parseFloat(document.getElementById('answer-input').value);
+            const correctAnswer = parseFloat(currentProblem.counterMass);
+            const tolerance = 0.1;
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) < tolerance;
+            
+            const feedbackDiv = document.getElementById('feedback');
+            const inputField = document.getElementById('answer-input');
+            
+            // 기존 애니메이션 중지
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            if (isCorrect) {
+                feedbackDiv.className = 'feedback correct';
+                inputField.className = 'correct';
+                feedbackDiv.innerHTML = `
+                    <h3>🎉 정답입니다!</h3>
+                    <p>정확합니다! 추의 질량은 <strong>${currentProblem.counterMass} kg</strong>입니다.</p>
+                    <p style="color: #065f46; margin-top: 0.5rem;">✅ 물체가 안정적으로 원운동을 계속합니다.</p>
+                `;
+                
+                // 원운동 애니메이션 계속
+                animateCircularMotion();
+                
+            } else {
+                feedbackDiv.className = 'feedback incorrect';
+                inputField.className = 'incorrect';
+                feedbackDiv.innerHTML = `
+                    <h3>❌ 다시 확인해보세요</h3>
+                    <p style="color: #991b1b; margin-bottom: 1rem;">⚠️ 줄이 끊어졌습니다! 물체가 접선 방향으로 직선 운동합니다.</p>
+                    <div class="solution-box">
+                        <p><strong>풀이:</strong></p>
+                        <div class="solution-steps">
+                            <p>1. 구심력: F = mv²/r = ${currentProblem.mass} × ${currentProblem.speed}² / ${currentProblem.radius} = ${currentProblem.centripetalForce} N</p>
+                            <p>2. 수평 회전에 필요한 구심력은 줄의 장력 T가 제공: T = mv²/r</p>
+                            <p>3. 추가 정지상태이므로: T = Mg</p>
+                            <p>4. 따라서: Mg = mv²/r</p>
+                            <p>5. <strong>M = mv²/(rg) = ${currentProblem.mass} × ${currentProblem.speed}² / (${currentProblem.radius} × 10) = ${currentProblem.counterMass} kg</strong></p>
+                        </div>
+                    </div>
+                    <div class="key-point">
+                        <p><strong>핵심:</strong> 수평면 위의 등속원운동에서 구심력 = 장력 = 추의 무게입니다!</p>
+                    </div>
+                `;
+                
+                // 줄 끊어지는 애니메이션 시작
+                animateStringBreak();
+            }
+        }
+
+        // 페이지 로드 시 첫 문제 생성 및 애니메이션 시작
+        window.onload = function() {
+            newProblem();
+        };
+
+        // Enter 키로 정답 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('answer-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

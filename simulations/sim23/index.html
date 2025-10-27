@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 등속원운동 레이싱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .problem-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .problem-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .diagram {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .questions {
+            margin: 20px 0;
+        }
+        
+        .question-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #e63946;
+        }
+        
+        .answer-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .radio-label:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .radio-label input {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #06ffa5 0%, #00d4aa 100%);
+            color: #1a1a2e;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(6, 255, 165, 0.3);
+        }
+        
+        .btn-new {
+            background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+            color: white;
+        }
+        
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.success {
+            background: linear-gradient(135deg, #06ffa5 0%, #00d4aa 100%);
+            color: #1a1a2e;
+        }
+        
+        .result.failure {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .celebration.active {
+            display: block;
+        }
+        
+        .trophy {
+            font-size: 150px;
+            text-align: center;
+            margin: 50px 0;
+            animation: trophyBounce 0.6s ease-in-out;
+        }
+        
+        @keyframes trophyBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .solution {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .solution h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .solution p {
+            line-height: 1.8;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏎️ F1 물리학 레이싱</h1>
+            <div class="subtitle">등속원운동 챌린지</div>
+        </div>
+        
+        <div class="problem-card">
+            <div class="problem-text" id="problemText"></div>
+            
+            <div class="diagram">
+                <canvas id="canvas" width="400" height="400"></canvas>
+            </div>
+            
+            <div class="questions">
+                <div class="question-item" id="question1"></div>
+                <div class="question-item" id="question2"></div>
+                <div class="question-item">ㄷ. 구심 가속도의 크기는 A가 B보다 작다.</div>
+            </div>
+            
+            <div class="answer-section">
+                <label class="radio-label">
+                    <input type="radio" name="answer" value="1"> ① ㄱ
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="answer" value="2"> ② ㄷ
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="answer" value="3"> ③ ㄱ, ㄴ
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="answer" value="4"> ④ ㄴ, ㄷ
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="answer" value="5"> ⑤ ㄱ, ㄴ, ㄷ
+                </label>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-submit" onclick="checkAnswer()">🏁 완주 시도</button>
+                <button class="btn btn-new" onclick="newProblem()">🔄 새로운 레이스</button>
+            </div>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+    
+    <div class="celebration" id="celebration"></div>
+    
+    <script>
+        let currentProblem = {};
+        let animationId = null;
+        let carA = { angle: Math.PI / 2 };
+        let carB = { angle: Math.PI / 2 };
+        
+        function newProblem() {
+            // 이전 애니메이션 중지
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            // 랜덤 변수 생성
+            const radiusA = Math.floor(Math.random() * 3 + 2); // 2-4m
+            const radiusB = Math.floor(Math.random() * 3 + 5); // 5-7m
+            const timeToC = Math.floor(Math.random() * 2 + 5); // 5-6초
+            
+            // A의 주기 계산 (1/4 바퀴를 timeToC초에)
+            const periodA = timeToC * 4;
+            
+            // B의 주기는 timeToC초 (한 바퀴)
+            const periodB = timeToC;
+            
+            // 계산
+            const speedA = (2 * Math.PI * radiusA) / periodA;
+            const speedB = (2 * Math.PI * radiusB) / periodB;
+            const accelA = (4 * Math.PI * Math.PI * radiusA) / (periodA * periodA);
+            const accelB = (4 * Math.PI * Math.PI * radiusB) / (periodB * periodB);
+            
+            // ㄱ에서 사용할 랜덤 주기값 (실제 주기와 다르게)
+            let randomPeriod;
+            do {
+                randomPeriod = Math.floor(Math.random() * 5 + 6); // 6-10초
+            } while (randomPeriod === periodA); // 실제 주기와 같으면 다시 생성
+            
+            // ㄴ에서 사용할 속력 값 (실제 속력과 다르게)
+            const correctSpeedCoeff = (2 * radiusB / timeToC);
+            let displaySpeedCoeff;
+            do {
+                displaySpeedCoeff = Math.floor(Math.random() * 5 + 2); // 2-6 정도
+            } while (Math.abs(displaySpeedCoeff - correctSpeedCoeff) < 0.5); // 실제 값과 충분히 다르게
+            
+            currentProblem = {
+                radiusA, radiusB, periodA, periodB, timeToC, randomPeriod,
+                speedA, speedB, accelA, accelB,
+                correctSpeedCoeff, displaySpeedCoeff
+            };
+            
+            // 문제 텍스트 업데이트
+            document.getElementById('problemText').innerHTML = `
+                그림은 물체 A, B가 xy평면상의 원점을 중심으로 반지름이 각각 
+                <strong>${radiusA}m, ${radiusB}m</strong>인 궤도를 따라 등속 원운동 하는 모습을 나타낸 것이다. 
+                A, B가 y축상의 점 a, b에서 동시에 출발하여, <strong>${timeToC}초</strong> 후에 A는 x축상의 점 c에 
+                처음으로 도달하고, B는 한 바퀴를 돌아 b에 도달한다.
+            `;
+            
+            // 질문 업데이트
+            document.getElementById('question1').textContent = `ㄱ. A의 주기는 ${randomPeriod}초이다.`;
+            
+            const displaySpeed = displaySpeedCoeff.toFixed(0);
+            document.getElementById('question2').textContent = `ㄴ. B의 속력은 ${displaySpeed}π/3 m/s이다.`;
+            
+            // 자동차 초기화
+            carA.angle = Math.PI / 2;
+            carB.angle = Math.PI / 2;
+            
+            // 애니메이션 시작
+            animate();
+            
+            // 결과 숨기기
+            document.getElementById('result').className = 'result';
+            document.querySelectorAll('input[name="answer"]').forEach(radio => radio.checked = false);
+        }
+        
+        function animate() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            drawDiagram(ctx);
+            
+            // 각속도 계산 (rad/s)
+            const omegaA = (2 * Math.PI) / currentProblem.periodA;
+            const omegaB = (2 * Math.PI) / currentProblem.periodB;
+            
+            // 각도 업데이트 (60fps 기준 = 1/60초)
+            carA.angle += omegaA / 60;
+            carB.angle += omegaB / 60;
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function drawDiagram(ctx) {
+            const centerX = 200;
+            const centerY = 200;
+            const scale = 25;
+            
+            ctx.clearRect(0, 0, 400, 400);
+            
+            // 좌표축
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(400, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, 400);
+            ctx.stroke();
+            
+            // 축 레이블
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('x(m)', 370, centerY - 10);
+            ctx.fillText('y(m)', centerX + 10, 20);
+            ctx.fillText('O', centerX + 5, centerY - 5);
+            
+            // 원 B (큰 원)
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, currentProblem.radiusB * scale, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // 원 A (작은 원)
+            ctx.strokeStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, currentProblem.radiusA * scale, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 점 표시
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            
+            // 점 a
+            ctx.fillText('a', centerX + 10, centerY - currentProblem.radiusA * scale);
+            
+            // 점 b
+            ctx.fillText('b', centerX + 10, centerY - currentProblem.radiusB * scale);
+            
+            // 점 c
+            ctx.fillText('c', centerX + currentProblem.radiusA * scale + 10, centerY);
+            
+            // F1 카 A 그리기
+            const carAX = centerX + currentProblem.radiusA * scale * Math.cos(carA.angle);
+            const carAY = centerY - currentProblem.radiusA * scale * Math.sin(carA.angle);
+            drawCar(ctx, carAX, carAY, carA.angle, '#e63946', 'A');
+            
+            // F1 카 B 그리기
+            const carBX = centerX + currentProblem.radiusB * scale * Math.cos(carB.angle);
+            const carBY = centerY - currentProblem.radiusB * scale * Math.sin(carB.angle);
+            drawCar(ctx, carBX, carBY, carB.angle, '#1a73e8', 'B');
+        }
+        
+        function drawCar(ctx, x, y, angle, color, label) {
+            ctx.save();
+            ctx.translate(x, y);
+            // 진행 방향을 바라보도록 회전
+            ctx.rotate(-angle);
+            
+            // 차체
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(0, -12);
+            ctx.lineTo(8, 0);
+            ctx.lineTo(6, 12);
+            ctx.lineTo(-6, 12);
+            ctx.lineTo(-8, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 앞부분 (노즈)
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(0, -12, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 윙
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-10, 8);
+            ctx.lineTo(10, 8);
+            ctx.stroke();
+            
+            // 타이어
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-8, -4, 3, 6);
+            ctx.fillRect(5, -4, 3, 6);
+            ctx.fillRect(-8, 4, 3, 6);
+            ctx.fillRect(5, 4, 3, 6);
+            
+            // 라벨
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, 0, 2);
+            
+            ctx.restore();
+        }
+        
+        function checkAnswer() {
+            const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+            
+            if (!selectedAnswer) {
+                alert('답을 선택해주세요!');
+                return;
+            }
+            
+            const answerValue = parseInt(selectedAnswer.value);
+            
+            // 정답 계산
+            const correct1 = currentProblem.periodA === currentProblem.randomPeriod; // 항상 false
+            const correct2 = Math.abs(currentProblem.correctSpeedCoeff - currentProblem.displaySpeedCoeff) < 0.5; // 항상 false
+            const correct3 = currentProblem.accelA < currentProblem.accelB;
+            
+            // 올바른 답 결정
+            let correctAnswer;
+            if (correct1 && correct2 && correct3) correctAnswer = 5; // ㄱ, ㄴ, ㄷ
+            else if (correct2 && correct3) correctAnswer = 4; // ㄴ, ㄷ
+            else if (correct1 && correct2) correctAnswer = 3; // ㄱ, ㄴ
+            else if (correct3) correctAnswer = 2; // ㄷ
+            else if (correct1) correctAnswer = 1; // ㄱ
+            else correctAnswer = 0; // 없음 (이런 경우는 없어야 함)
+            
+            const resultDiv = document.getElementById('result');
+            
+            if (answerValue === correctAnswer) {
+                // 정답!
+                resultDiv.className = 'result success show';
+                resultDiv.innerHTML = `
+                    <div class="trophy">🏆</div>
+                    <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">🎉 완주 성공! 1등! 🎉</h2>
+                    <p style="text-align: center; font-size: 1.3em;">정답입니다! F1 챔피언!</p>
+                `;
+                createFireworks();
+            } else {
+                // 오답
+                const displaySpeed = (currentProblem.speedB * 3 / Math.PI).toFixed(0);
+                
+                const correctAnswers = [];
+                if (correct1) correctAnswers.push('ㄱ');
+                if (correct2) correctAnswers.push('ㄴ');
+                if (correct3) correctAnswers.push('ㄷ');
+                const correctAnswerText = correctAnswers.join(', ');
+                
+                resultDiv.className = 'result failure show';
+                resultDiv.innerHTML = `
+                    <h2 style="text-align: center; font-size: 2em; margin-bottom: 20px;">❌ 완주 실패...</h2>
+                    <div class="solution">
+                        <h3>📝 풀이</h3>
+                        <p><strong>주어진 조건:</strong></p>
+                        <p>• A의 반지름: ${currentProblem.radiusA}m, B의 반지름: ${currentProblem.radiusB}m</p>
+                        <p>• ${currentProblem.timeToC}초 후 A는 점 c에 도달 (1/4 바퀴), B는 한 바퀴 완료</p>
+                        <p></p>
+                        <p><strong>ㄱ. A의 주기:</strong></p>
+                        <p>A가 1/4 바퀴(90°)를 ${currentProblem.timeToC}초에 도달하므로,</p>
+                        <p>A의 주기 T_A = ${currentProblem.timeToC} × 4 = ${currentProblem.periodA}초</p>
+                        <p>문제에서 제시한 ${currentProblem.randomPeriod}초와 ${currentProblem.periodA === currentProblem.randomPeriod ? '같다' : '다르다'}</p>
+                        <p>따라서 "${correct1 ? '참' : '거짓'}"</p>
+                        <p></p>
+                        <p><strong>ㄴ. B의 속력:</strong></p>
+                        <p>B가 한 바퀴를 ${currentProblem.timeToC}초에 완료하므로,</p>
+                        <p>B의 주기 T_B = ${currentProblem.timeToC}초</p>
+                        <p>B의 속력 v_B = 2πr_B / T_B = 2π × ${currentProblem.radiusB} / ${currentProblem.timeToC}</p>
+                        <p>= ${currentProblem.correctSpeedCoeff.toFixed(2)}π m/s = ${currentProblem.correctSpeedCoeff.toFixed(0)}π/3 m/s</p>
+                        <p>문제에서 제시한 ${currentProblem.displaySpeedCoeff.toFixed(0)}π/3 m/s와 다르다</p>
+                        <p>따라서 "거짓"</p>
+                        <p></p>
+                        <p><strong>ㄷ. 구심 가속도:</strong></p>
+                        <p>구심 가속도 a = v²/r = 4π²r / T²</p>
+                        <p>a_A = 4π² × ${currentProblem.radiusA} / ${currentProblem.periodA}² = ${currentProblem.accelA.toFixed(3)} m/s²</p>
+                        <p>a_B = 4π² × ${currentProblem.radiusB} / ${currentProblem.timeToC}² = ${currentProblem.accelB.toFixed(3)} m/s²</p>
+                        <p>따라서 A가 B보다 ${currentProblem.accelA < currentProblem.accelB ? '작다' : '크다'} → "${correct3 ? '참' : '거짓'}"</p>
+                        <p></p>
+                        <p style="color: #ffd700; font-weight: bold; font-size: 1.2em;">정답: ${correctAnswerText}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function createFireworks() {
+            const celebration = document.getElementById('celebration');
+            celebration.className = 'celebration active';
+            celebration.innerHTML = '';
+            
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffd93d', '#6bcf7f', '#ff69b4', '#f38181', '#aa96da'];
+            
+            // 여러 위치에서 불꽃놀이 발사
+            for (let burst = 0; burst < 8; burst++) {
+                setTimeout(() => {
+                    const burstX = 20 + Math.random() * 60;
+                    const burstY = 20 + Math.random() * 60;
+                    
+                    for (let i = 0; i < 30; i++) {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        particle.style.left = burstX + '%';
+                        particle.style.top = burstY + '%';
+                        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        const angle = (Math.PI * 2 * i) / 30;
+                        const velocity = 100 + Math.random() * 100;
+                        const tx = Math.cos(angle) * velocity;
+                        const ty = Math.sin(angle) * velocity;
+                        
+                        particle.style.setProperty('--tx', tx + 'px');
+                        particle.style.setProperty('--ty', ty + 'px');
+                        particle.style.animation = 'explode 1s ease-out forwards';
+                        
+                        celebration.appendChild(particle);
+                        
+                        setTimeout(() => particle.remove(), 1000);
+                    }
+                }, burst * 200);
+            }
+            
+            setTimeout(() => {
+                celebration.className = 'celebration';
+            }, 3000);
+        }
+        
+        // 초기 문제 생성
+        newProblem();
+    </script>
+</body>
+</html>
