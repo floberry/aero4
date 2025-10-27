@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>등가원리 - 관성기준계</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .simulation-area {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .train-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #8B4513 60%, #8B4513 100%);
+            border: 2px solid #333;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .train {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 80px;
+            background: #ddd;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+        
+        .train::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            width: 15px;
+            height: 15px;
+            background: #333;
+            border-radius: 50%;
+        }
+        
+        .train::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            width: 15px;
+            height: 15px;
+            background: #333;
+            border-radius: 50%;
+        }
+        
+        .object {
+            position: absolute;
+            bottom: 80px;
+            width: 40px;
+            height: 40px;
+            background: #ff6b6b;
+            border: 2px solid #333;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .string {
+            position: absolute;
+            bottom: 120px;
+            width: 2px;
+            background: #333;
+            transform-origin: bottom;
+        }
+        
+        .pulley {
+            position: absolute;
+            bottom: 120px;
+            right: 20px;
+            width: 20px;
+            height: 20px;
+            background: #666;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+        
+        .hanging-object {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: #4ecdc4;
+            border: 2px solid #333;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .hanging-string {
+            position: absolute;
+            bottom: 60px;
+            right: 29px;
+            width: 2px;
+            height: 60px;
+            background: #333;
+        }
+        
+        .problem-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .problem-info h3 {
+            color: #4facfe;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .info-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-item .value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .answer-section {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .answer-section h3 {
+            color: #4facfe;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .answer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .answer-item {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid #4caf50;
+        }
+        
+        .answer-item .label {
+            font-size: 12px;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+        
+        .answer-item .value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .explanation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .formula {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>등가원리 - 관성기준계</h1>
+            <p>정적 평형 상태의 물체들</p>
+        </div>
+        
+        <div class="simulation-area">
+            <div class="train-container">
+                <div class="train"></div>
+                <div class="object" id="object"></div>
+                <div class="string" id="string"></div>
+                <div class="pulley"></div>
+                <div class="hanging-string"></div>
+                <div class="hanging-object" id="hanging-object"></div>
+            </div>
+            
+            <div class="problem-info">
+                <h3>📊 문제 조건</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">물체 A 질량</div>
+                        <div class="value" id="mass-a">0 kg</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">물체 B 질량</div>
+                        <div class="value" id="mass-b">0 kg</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">기차 가속도</div>
+                        <div class="value" id="acceleration">0 m/s²</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">줄의 장력</div>
+                        <div class="value" id="tension">? N</div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="generateNewProblem()">새 문제</button>
+                    <button class="btn btn-secondary" onclick="showAnswer()">정답 보기</button>
+                </div>
+            </div>
+            
+            <div class="answer-section hidden" id="answer-section">
+                <h3>📋 정답 및 해설</h3>
+                <div class="answer-grid">
+                    <div class="answer-item">
+                        <div class="label">줄의 장력</div>
+                        <div class="value" id="answer-tension">0 N</div>
+                    </div>
+                    <div class="answer-item">
+                        <div class="label">접촉력</div>
+                        <div class="value" id="answer-normal">0 N</div>
+                    </div>
+                </div>
+                
+                <div class="explanation">
+                    <strong>💡 해설:</strong><br>
+                    관성기준계에서 물체들이 정적 평형을 이루려면 모든 힘의 합이 0이어야 합니다.
+                    
+                    <div class="formula">
+                        물체 A: T = m₁ × a<br>
+                        물체 B: T = m₂ × g<br>
+                        평형조건: m₁ × a = m₂ × g
+                    </div>
+                    
+                    <div id="detailed-explanation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        
+        function generateNewProblem() {
+            // 랜덤 값 생성
+            const massA = Math.floor(Math.random() * 8 + 2); // 2-10 kg
+            const massB = Math.floor(Math.random() * 6 + 1); // 1-6 kg
+            const acceleration = Math.floor(Math.random() * 8 + 2); // 2-10 m/s²
+            
+            currentProblem = {
+                massA: massA,
+                massB: massB,
+                acceleration: acceleration
+            };
+            
+            // UI 업데이트
+            document.getElementById('mass-a').textContent = massA + ' kg';
+            document.getElementById('mass-b').textContent = massB + ' kg';
+            document.getElementById('acceleration').textContent = acceleration + ' m/s²';
+            document.getElementById('tension').textContent = '? N';
+            
+            // 물체 위치 랜덤 조정
+            const object = document.getElementById('object');
+            const randomLeft = Math.floor(Math.random() * 180 + 50); // 50-230px
+            object.style.left = randomLeft + 'px';
+            object.textContent = 'A';
+            
+            const hangingObject = document.getElementById('hanging-object');
+            hangingObject.textContent = 'B';
+            
+            // 줄 위치 조정
+            const string = document.getElementById('string');
+            string.style.left = (randomLeft + 19) + 'px';
+            string.style.height = '40px';
+            
+            // 정답 섹션 숨기기
+            document.getElementById('answer-section').classList.add('hidden');
+        }
+        
+        function showAnswer() {
+            const g = 9.8; // 중력가속도
+            
+            // 평형 조건 계산
+            // 물체 A: T = m₁ × a (의사력)
+            // 물체 B: T = m₂ × g
+            // 평형: m₁ × a = m₂ × g
+            
+            const tensionFromA = currentProblem.massA * currentProblem.acceleration;
+            const tensionFromB = currentProblem.massB * g;
+            
+            // 실제 장력은 두 값의 평균 또는 평형 조건 고려
+            const actualTension = Math.round(tensionFromB * 10) / 10;
+            const normalForce = Math.round((currentProblem.massA * g) * 10) / 10;
+            
+            document.getElementById('answer-tension').textContent = actualTension + ' N';
+            document.getElementById('answer-normal').textContent = normalForce + ' N';
+            
+            // 상세 설명
+            const explanation = `
+                <br><strong>계산 과정:</strong><br>
+                • 물체 A에 작용하는 의사력: F = m₁ × a = ${currentProblem.massA} × ${currentProblem.acceleration} = ${tensionFromA} N<br>
+                • 물체 B에 작용하는 중력: W = m₂ × g = ${currentProblem.massB} × 9.8 = ${tensionFromB} N<br>
+                • 줄의 장력: T = ${actualTension} N<br>
+                • 물체 A와 바닥 간 접촉력: N = ${normalForce} N
+            `;
+            
+            document.getElementById('detailed-explanation').innerHTML = explanation;
+            document.getElementById('answer-section').classList.remove('hidden');
+        }
+        
+        // 초기 문제 생성
+        generateNewProblem();
+    </script>
+</body>
+</html>

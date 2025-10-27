@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회전 모멘트 문제</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: white;
+            line-height: 1.6;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        
+        .description {
+            color: #374151;
+            margin-bottom: 16px;
+        }
+        
+        .btn {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .case-item {
+            text-align: center;
+        }
+        
+        .case-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .case-svg {
+            border: 2px solid #d1d5db;
+            margin: 0 auto;
+        }
+        
+        .answer-section {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .answer-question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .answer-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            max-width: 400px;
+            margin: 0 auto 16px;
+        }
+        
+        .answer-option {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .answer-option:hover {
+            background-color: #f9fafb;
+        }
+        
+        .answer-option input {
+            margin-right: 8px;
+        }
+        
+        .result-box {
+            margin-top: 24px;
+            padding: 16px;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+        }
+        
+        .result-message {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .explanation {
+            margin-top: 16px;
+        }
+        
+        .explanation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .explanation-case {
+            text-align: center;
+        }
+        
+        .explanation-result {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        
+        .explanation-result.rotating {
+            color: #059669;
+            font-weight: 600;
+        }
+        
+        .explanation-result.equilibrium {
+            color: #6b7280;
+            font-weight: 600;
+        }
+        
+        .explanation-text {
+            background-color: white;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+        
+        .btn-challenge {
+            background-color: #f59e0b;
+            color: white;
+            margin-left: 8px;
+        }
+        
+        .btn-challenge:hover {
+            background-color: #d97706;
+        }
+        
+        .challenge-info {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .challenge-result {
+            background-color: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: center;
+        }
+        
+        .challenge-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #1e40af;
+        }
+        
+        .challenge-score {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .challenge-rank {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        
+        .rank-physics {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .rank-teacher {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .rank-expert {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .rank-trainee {
+            background-color: #fce7f3;
+            color: #be185d;
+        }
+        
+        .rank-retry {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">회전 모멘트 문제</h1>
+        <p class="description">
+            그림은 마찰이 없는 수평면에 정지한 상태로 놓인 정사각형 판에 두 힘 F를 작용하는 모습을 나타낸 것이다.
+            회전축은 네 모서리 중 한 곳에 위치합니다.
+        </p>
+        <button class="btn btn-primary" onclick="generateNewProblem()">새 문제</button>
+        <button class="btn btn-challenge" onclick="startChallengeMode()">도전 모드</button>
+    </div>
+
+    <div id="axis-info" class="axis-info" style="display: none;"></div>
+    <div id="challenge-info" class="challenge-info" style="display: none;"></div>
+    <div id="challenge-result" class="challenge-result" style="display: none;"></div>
+
+    <div id="problem-container" style="display: none;">
+        <div class="cases-grid" id="cases-grid"></div>
+        
+        <div class="answer-section">
+            <p class="answer-question">판이 회전하는 경우를 모두 고르시오.</p>
+            
+            <div class="answer-options">
+                <label class="answer-option">
+                    <input type="checkbox" value="(가)" onchange="updateAnswer(this)"> (가)
+                </label>
+                <label class="answer-option">
+                    <input type="checkbox" value="(나)" onchange="updateAnswer(this)"> (나)
+                </label>
+                <label class="answer-option">
+                    <input type="checkbox" value="(다)" onchange="updateAnswer(this)"> (다)
+                </label>
+            </div>
+
+            <button class="btn btn-success" onclick="checkAnswer()">정답 확인</button>
+        </div>
+
+        <div id="result-container" class="result-box" style="display: none;">
+            <div id="result-message" class="result-message"></div>
+            <button id="show-explanation-btn" class="btn btn-primary" onclick="showExplanation()" style="display: none;">해설 보기</button>
+            
+            <div id="explanation-container" class="explanation" style="display: none;">
+                <h3>상세 해설 (그림 분석)</h3>
+                <div class="explanation-grid" id="explanation-grid"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = null;
+        let selectedAnswers = [];
+        let rotationAxis = null;
+        let challengeMode = false;
+        let challengeQuestions = [];
+        let currentChallengeIndex = 0;
+        let challengeScore = 0;
+
+        // 가능한 화살표 위치 (각 모서리와 변의 중앙)
+        const positions = [
+            { id: 'top-left', x: 0, y: 0, type: 'corner' },
+            { id: 'top-center', x: 50, y: 0, type: 'edge' },
+            { id: 'top-right', x: 100, y: 0, type: 'corner' },
+            { id: 'right-center', x: 100, y: 50, type: 'edge' },
+            { id: 'bottom-right', x: 100, y: 100, type: 'corner' },
+            { id: 'bottom-center', x: 50, y: 100, type: 'edge' },
+            { id: 'bottom-left', x: 0, y: 100, type: 'corner' },
+            { id: 'left-center', x: 0, y: 50, type: 'edge' }
+        ];
+
+        // 네 모서리 위치
+        const cornerPositions = [
+            { id: 'top-left', x: 0, y: 0, name: '왼쪽 위' },
+            { id: 'top-right', x: 100, y: 0, name: '오른쪽 위' },
+            { id: 'bottom-right', x: 100, y: 100, name: '오른쪽 아래' },
+            { id: 'bottom-left', x: 0, y: 100, name: '왼쪽 아래' }
+        ];
+
+        const directions = ['up', 'down', 'left', 'right'];
+        const forces = ['F', '2F'];
+
+        // 회전 모멘트 계산 함수
+        function calculateTorque(forces) {
+            let totalTorque = 0;
+            
+            forces.forEach(force => {
+                const pos = positions.find(p => p.id === force.position);
+                const dx = pos.x - rotationAxis.x;
+                const dy = pos.y - rotationAxis.y;
+                
+                let torque = 0;
+                const magnitude = force.magnitude === 'F' ? 1 : 2;
+
+                // 회전 모멘트 계산 (반시계방향을 양수로)
+                switch(force.direction) {
+                    case 'up':
+                        torque = dx * magnitude;
+                        break;
+                    case 'down':
+                        torque = -dx * magnitude;
+                        break;
+                    case 'left':
+                        torque = -dy * magnitude;
+                        break;
+                    case 'right':
+                        torque = dy * magnitude;
+                        break;
+                }
+                
+                totalTorque += torque;
+            });
+
+            return Math.abs(totalTorque) > 0.1; // 회전 여부 (부동소수점 오차 고려)
+        }
+
+        // 새 문제 생성
+        function generateNewProblem() {
+            // 도전 모드 초기화
+            challengeMode = false;
+            challengeQuestions = [];
+            currentChallengeIndex = 0;
+            challengeScore = 0;
+            
+            // UI 초기화
+            document.getElementById('challenge-info').style.display = 'none';
+            document.getElementById('challenge-result').style.display = 'none';
+            
+            createSingleProblem();
+        }
+
+        // 단일 문제 생성
+        function createSingleProblem() {
+            // 회전축을 네 모서리 중 랜덤으로 선택
+            rotationAxis = cornerPositions[Math.floor(Math.random() * cornerPositions.length)];
+            
+            const problem = { cases: [] };
+
+            // (가), (나), (다) 각각에 대해 2개씩 화살표 생성
+            for (let caseIndex = 0; caseIndex < 3; caseIndex++) {
+                const caseForces = [];
+                const usedPositions = new Set();
+
+                for (let i = 0; i < 2; i++) {
+                    let position;
+                    do {
+                        position = positions[Math.floor(Math.random() * positions.length)].id;
+                    } while (usedPositions.has(position) || position === rotationAxis.id);
+                    
+                    usedPositions.add(position);
+
+                    const force = {
+                        position: position,
+                        direction: directions[Math.floor(Math.random() * directions.length)],
+                        magnitude: caseIndex === 0 ? 'F' : forces[Math.floor(Math.random() * forces.length)]
+                    };
+
+                    caseForces.push(force);
+                }
+
+                problem.cases.push(caseForces);
+            }
+
+            currentProblem = problem;
+            selectedAnswers = [];
+            
+            // UI 업데이트
+            if (!challengeMode) {
+                document.getElementById('axis-info').textContent = `회전축 위치: ${rotationAxis.name} 모서리`;
+                document.getElementById('axis-info').style.display = 'block';
+            }
+            document.getElementById('problem-container').style.display = 'block';
+            document.getElementById('result-container').style.display = 'none';
+            
+            // 체크박스 초기화
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            renderProblem();
+        }
+
+        // 도전 모드 시작
+        function startChallengeMode() {
+            challengeMode = true;
+            challengeQuestions = [];
+            currentChallengeIndex = 0;
+            challengeScore = 0;
+            
+            // 10개 문제 미리 생성
+            for (let i = 0; i < 10; i++) {
+                challengeQuestions.push(generateProblemData());
+            }
+            
+            // UI 업데이트
+            document.getElementById('axis-info').style.display = 'none';
+            document.getElementById('challenge-result').style.display = 'none';
+            updateChallengeInfo();
+            
+            // 첫 번째 문제 로드
+            loadChallengeQuestion();
+        }
+
+        // 문제 데이터 생성 (UI 업데이트 없이)
+        function generateProblemData() {
+            // 회전축을 네 모서리 중 랜덤으로 선택
+            const axis = cornerPositions[Math.floor(Math.random() * cornerPositions.length)];
+            
+            const problem = { cases: [] };
+
+            // (가), (나), (다) 각각에 대해 2개씩 화살표 생성
+            for (let caseIndex = 0; caseIndex < 3; caseIndex++) {
+                const caseForces = [];
+                const usedPositions = new Set();
+
+                for (let i = 0; i < 2; i++) {
+                    let position;
+                    do {
+                        position = positions[Math.floor(Math.random() * positions.length)].id;
+                    } while (usedPositions.has(position) || position === axis.id);
+                    
+                    usedPositions.add(position);
+
+                    const force = {
+                        position: position,
+                        direction: directions[Math.floor(Math.random() * directions.length)],
+                        magnitude: caseIndex === 0 ? 'F' : forces[Math.floor(Math.random() * forces.length)]
+                    };
+
+                    caseForces.push(force);
+                }
+
+                problem.cases.push(caseForces);
+            }
+
+            return { problem, axis };
+        }
+
+        // 도전 모드 문제 로드
+        function loadChallengeQuestion() {
+            const questionData = challengeQuestions[currentChallengeIndex];
+            currentProblem = questionData.problem;
+            rotationAxis = questionData.axis;
+            selectedAnswers = [];
+            
+            // UI 업데이트
+            updateChallengeInfo();
+            document.getElementById('problem-container').style.display = 'block';
+            document.getElementById('result-container').style.display = 'none';
+            
+            // 체크박스 초기화
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            renderProblem();
+        }
+
+        // 도전 모드 정보 업데이트
+        function updateChallengeInfo() {
+            const challengeInfo = document.getElementById('challenge-info');
+            challengeInfo.textContent = `도전 모드: ${currentChallengeIndex + 1}/10 문제 (현재 점수: ${challengeScore}점) | 회전축: ${rotationAxis.name} 모서리`;
+            challengeInfo.style.display = 'block';
+        }
+
+        // 문제 렌더링
+        function renderProblem() {
+            if (!currentProblem) return;
+
+            const casesGrid = document.getElementById('cases-grid');
+            casesGrid.innerHTML = '';
+
+            currentProblem.cases.forEach((caseForces, index) => {
+                const caseDiv = document.createElement('div');
+                caseDiv.className = 'case-item';
+                
+                const title = document.createElement('h3');
+                title.className = 'case-title';
+                title.textContent = `(${['가', '나', '다'][index]})`;
+                
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '150');
+                svg.setAttribute('height', '150');
+                svg.setAttribute('viewBox', '-25 -25 150 150');
+                svg.className = 'case-svg';
+                
+                // 정사각형
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', '0');
+                rect.setAttribute('y', '0');
+                rect.setAttribute('width', '100');
+                rect.setAttribute('height', '100');
+                rect.setAttribute('fill', 'lightgray');
+                rect.setAttribute('stroke', 'black');
+                rect.setAttribute('stroke-width', '2');
+                svg.appendChild(rect);
+                
+                // 회전축 표시
+                const axisCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                axisCircle.setAttribute('cx', rotationAxis.x);
+                axisCircle.setAttribute('cy', rotationAxis.y);
+                axisCircle.setAttribute('r', '4');
+                axisCircle.setAttribute('fill', 'blue');
+                svg.appendChild(axisCircle);
+                
+                const axisText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                axisText.setAttribute('x', rotationAxis.x);
+                axisText.setAttribute('y', rotationAxis.y + (rotationAxis.y === 0 ? -8 : rotationAxis.y === 100 ? 18 : 5));
+                axisText.setAttribute('text-anchor', 'middle');
+                axisText.setAttribute('font-size', '12');
+                axisText.setAttribute('font-weight', 'bold');
+                axisText.setAttribute('fill', 'blue');
+                axisText.textContent = 'O';
+                svg.appendChild(axisText);
+                
+                // 격자선
+                const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                vLine.setAttribute('x1', '50');
+                vLine.setAttribute('y1', '0');
+                vLine.setAttribute('x2', '50');
+                vLine.setAttribute('y2', '100');
+                vLine.setAttribute('stroke', 'black');
+                vLine.setAttribute('stroke-width', '1');
+                vLine.setAttribute('stroke-dasharray', '2,2');
+                svg.appendChild(vLine);
+                
+                const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                hLine.setAttribute('x1', '0');
+                hLine.setAttribute('y1', '50');
+                hLine.setAttribute('x2', '100');
+                hLine.setAttribute('y2', '50');
+                hLine.setAttribute('stroke', 'black');
+                hLine.setAttribute('stroke-width', '1');
+                hLine.setAttribute('stroke-dasharray', '2,2');
+                svg.appendChild(hLine);
+                
+                // 화살표들
+                caseForces.forEach(force => {
+                    const arrowGroup = renderArrow(force);
+                    svg.appendChild(arrowGroup);
+                });
+                
+                caseDiv.appendChild(title);
+                caseDiv.appendChild(svg);
+                casesGrid.appendChild(caseDiv);
+            });
+        }
+
+        // 화살표 렌더링
+        function renderArrow(force) {
+            const pos = positions.find(p => p.id === force.position);
+            const arrowSize = 20;
+            
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            let arrowPath = '';
+            let textX = pos.x;
+            let textY = pos.y;
+
+            switch(force.direction) {
+                case 'up':
+                    arrowPath = `M ${pos.x} ${pos.y - arrowSize} L ${pos.x - 5} ${pos.y - arrowSize + 10} M ${pos.x} ${pos.y - arrowSize} L ${pos.x + 5} ${pos.y - arrowSize + 10} M ${pos.x} ${pos.y - arrowSize} L ${pos.x} ${pos.y}`;
+                    textY -= 25;
+                    break;
+                case 'down':
+                    arrowPath = `M ${pos.x} ${pos.y + arrowSize} L ${pos.x - 5} ${pos.y + arrowSize - 10} M ${pos.x} ${pos.y + arrowSize} L ${pos.x + 5} ${pos.y + arrowSize - 10} M ${pos.x} ${pos.y + arrowSize} L ${pos.x} ${pos.y}`;
+                    textY += 35;
+                    break;
+                case 'left':
+                    arrowPath = `M ${pos.x - arrowSize} ${pos.y} L ${pos.x - arrowSize + 10} ${pos.y - 5} M ${pos.x - arrowSize} ${pos.y} L ${pos.x - arrowSize + 10} ${pos.y + 5} M ${pos.x - arrowSize} ${pos.y} L ${pos.x} ${pos.y}`;
+                    textX -= 35;
+                    break;
+                case 'right':
+                    arrowPath = `M ${pos.x + arrowSize} ${pos.y} L ${pos.x + arrowSize - 10} ${pos.y - 5} M ${pos.x + arrowSize} ${pos.y} L ${pos.x + arrowSize - 10} ${pos.y + 5} M ${pos.x + arrowSize} ${pos.y} L ${pos.x} ${pos.y}`;
+                    textX += 25;
+                    break;
+            }
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', arrowPath);
+            path.setAttribute('stroke', 'red');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            group.appendChild(path);
+
+            if (force.magnitude === '2F') {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', textX);
+                text.setAttribute('y', textY);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '12');
+                text.setAttribute('fill', 'red');
+                text.setAttribute('font-weight', 'bold');
+                text.textContent = '2F';
+                group.appendChild(text);
+            }
+
+            return group;
+        }
+
+        // 답안 업데이트
+        function updateAnswer(checkbox) {
+            if (checkbox.checked) {
+                if (!selectedAnswers.includes(checkbox.value)) {
+                    selectedAnswers.push(checkbox.value);
+                }
+            } else {
+                selectedAnswers = selectedAnswers.filter(answer => answer !== checkbox.value);
+            }
+        }
+
+        // 정답 확인
+        function checkAnswer() {
+            if (!currentProblem) return;
+
+            const rotatingCases = [];
+            currentProblem.cases.forEach((caseForces, index) => {
+                if (calculateTorque(caseForces)) {
+                    rotatingCases.push(['(가)', '(나)', '(다)'][index]);
+                }
+            });
+
+            const correctAnswer = rotatingCases.sort().join(', ');
+            const userAnswer = selectedAnswers.sort().join(', ');
+            const isCorrect = correctAnswer === userAnswer;
+
+            if (challengeMode) {
+                // 도전 모드에서의 처리
+                if (isCorrect) {
+                    challengeScore++;
+                }
+                
+                currentChallengeIndex++;
+                
+                if (currentChallengeIndex < 10) {
+                    // 다음 문제로
+                    setTimeout(() => {
+                        loadChallengeQuestion();
+                    }, 1000);
+                    
+                    // 임시 결과 표시
+                    const resultContainer = document.getElementById('result-container');
+                    const resultMessage = document.getElementById('result-message');
+                    resultMessage.textContent = isCorrect ? '정답! 다음 문제로...' : '오답! 다음 문제로...';
+                    resultContainer.style.display = 'block';
+                    document.getElementById('show-explanation-btn').style.display = 'none';
+                } else {
+                    // 도전 모드 완료
+                    showChallengeResult();
+                }
+            } else {
+                // 일반 모드에서의 처리
+                const resultContainer = document.getElementById('result-container');
+                const resultMessage = document.getElementById('result-message');
+                const explanationBtn = document.getElementById('show-explanation-btn');
+
+                if (isCorrect) {
+                    resultMessage.textContent = '정답입니다! 🎉';
+                    explanationBtn.style.display = 'none';
+                } else {
+                    resultMessage.textContent = '오답입니다. 😅';
+                    explanationBtn.style.display = 'inline-block';
+                }
+
+                resultContainer.style.display = 'block';
+            }
+        }
+
+        // 도전 모드 결과 표시
+        function showChallengeResult() {
+            document.getElementById('problem-container').style.display = 'none';
+            document.getElementById('challenge-info').style.display = 'none';
+            
+            const resultDiv = document.getElementById('challenge-result');
+            let rankClass, rankText;
+            
+            if (challengeScore === 10) {
+                rankClass = 'rank-physics';
+                rankText = '🏆 물리학자 등극! 🏆';
+            } else if (challengeScore >= 7) {
+                rankClass = 'rank-teacher';
+                rankText = '📚 물리 선생님 등극! 📚';
+            } else if (challengeScore >= 4) {
+                rankClass = 'rank-expert';
+                rankText = '⚡ 물리2 고수 등극! ⚡';
+            } else if (challengeScore >= 1) {
+                rankClass = 'rank-trainee';
+                rankText = '🌱 물리 연습생 🌱';
+            } else {
+                rankClass = 'rank-retry';
+                rankText = '💪 다시 도전해보세요! 💪';
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="challenge-title">도전 모드 완료!</div>
+                <div class="challenge-score">점수: ${challengeScore}/10</div>
+                <div class="challenge-rank ${rankClass}">${rankText}</div>
+                <button class="btn btn-primary" onclick="generateNewProblem()">새 문제로 돌아가기</button>
+                <button class="btn btn-challenge" onclick="startChallengeMode()">다시 도전하기</button>
+            `;
+            
+            resultDiv.style.display = 'block';
+        }
+
+        // 해설 보기
+        function showExplanation() {
+            const explanationContainer = document.getElementById('explanation-container');
+            const explanationGrid = document.getElementById('explanation-grid');
+            const explanationText = document.getElementById('explanation-text');
+
+            // 해설 그리드 생성
+            explanationGrid.innerHTML = '';
+            currentProblem.cases.forEach((caseForces, index) => {
+                const caseDiv = document.createElement('div');
+                caseDiv.className = 'explanation-case';
+                
+                const title = document.createElement('h4');
+                title.textContent = `(${['가', '나', '다'][index]})`;
+                
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '150');
+                svg.setAttribute('height', '150');
+                svg.setAttribute('viewBox', '-25 -25 150 150');
+                svg.className = 'case-svg';
+                
+                // 정사각형
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', '0');
+                rect.setAttribute('y', '0');
+                rect.setAttribute('width', '100');
+                rect.setAttribute('height', '100');
+                rect.setAttribute('fill', 'lightgray');
+                rect.setAttribute('stroke', 'black');
+                rect.setAttribute('stroke-width', '2');
+                svg.appendChild(rect);
+                
+                // 회전축
+                const axisCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                axisCircle.setAttribute('cx', rotationAxis.x);
+                axisCircle.setAttribute('cy', rotationAxis.y);
+                axisCircle.setAttribute('r', '4');
+                axisCircle.setAttribute('fill', 'blue');
+                svg.appendChild(axisCircle);
+                
+                // 격자선
+                const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                vLine.setAttribute('x1', '50');
+                vLine.setAttribute('y1', '0');
+                vLine.setAttribute('x2', '50');
+                vLine.setAttribute('y2', '100');
+                vLine.setAttribute('stroke', 'black');
+                vLine.setAttribute('stroke-width', '1');
+                vLine.setAttribute('stroke-dasharray', '2,2');
+                svg.appendChild(vLine);
+                
+                const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                hLine.setAttribute('x1', '0');
+                hLine.setAttribute('y1', '50');
+                hLine.setAttribute('x2', '100');
+                hLine.setAttribute('y2', '50');
+                hLine.setAttribute('stroke', 'black');
+                hLine.setAttribute('stroke-width', '1');
+                hLine.setAttribute('stroke-dasharray', '2,2');
+                svg.appendChild(hLine);
+                
+                // 화살표들
+                caseForces.forEach(force => {
+                    const arrowGroup = renderArrow(force);
+                    svg.appendChild(arrowGroup);
+                });
+                
+                const result = document.createElement('div');
+                result.className = `explanation-result ${calculateTorque(caseForces) ? 'rotating' : 'equilibrium'}`;
+                result.textContent = calculateTorque(caseForces) ? '회전함' : '평형상태';
+                
+                caseDiv.appendChild(title);
+                caseDiv.appendChild(svg);
+                caseDiv.appendChild(result);
+                explanationGrid.appendChild(caseDiv);
+            });
+
+            // 상세 해설 텍스트 생성
+            explanationText.textContent = generateExplanation();
+            explanationContainer.style.display = 'block';
+        }
+
+        // 해설 생성
+        function generateExplanation() {
+            if (!currentProblem) return '';
+
+            const rotatingCases = [];
+            currentProblem.cases.forEach((caseForces, index) => {
+                if (calculateTorque(caseForces)) {
+                    rotatingCases.push(['(가)', '(나)', '(다)'][index]);
+                }
+            });
+
+            let explanation = `해설:\n\n회전축 위치: ${rotationAxis.name} 모서리 (${rotationAxis.x}, ${rotationAxis.y})\n`;
+            explanation += '회전 모멘트 = 힘 × 회전축으로부터의 거리\n';
+            explanation += '반시계방향을 (+), 시계방향을 (-)로 계산합니다.\n\n';
+
+            currentProblem.cases.forEach((caseForces, index) => {
+                const caseName = ['(가)', '(나)', '(다)'][index];
+                const rotates = calculateTorque(caseForces);
+                
+                explanation += `${caseName} 분석:\n`;
+                
+                let totalMoment = 0;
+                caseForces.forEach((force, i) => {
+                    const pos = positions.find(p => p.id === force.position);
+                    const magnitude = force.magnitude === 'F' ? 1 : 2;
+                    const dx = pos.x - rotationAxis.x;
+                    const dy = pos.y - rotationAxis.y;
+                    
+                    let moment = 0;
+                    let momentDescription = '';
+                    
+                    switch(force.direction) {
+                        case 'up':
+                            moment = dx * magnitude;
+                            momentDescription = `${force.magnitude} × ${Math.abs(dx/50)} = ${Math.abs(moment)}`;
+                            break;
+                        case 'down':
+                            moment = -dx * magnitude;
+                            momentDescription = `${force.magnitude} × ${Math.abs(dx/50)} = ${Math.abs(moment)}`;
+                            break;
+                        case 'left':
+                            moment = -dy * magnitude;
+                            momentDescription = `${force.magnitude} × ${Math.abs(dy/50)} = ${Math.abs(moment)}`;
+                            break;
+                        case 'right':
+                            moment = dy * magnitude;
+                            momentDescription = `${force.magnitude} × ${Math.abs(dy/50)} = ${Math.abs(moment)}`;
+                            break;
+                    }
+                    
+                    totalMoment += moment;
+                    const directionKorean = { up: '↑', down: '↓', left: '←', right: '→' }[force.direction];
+                    explanation += `- ${force.magnitude} ${directionKorean}: ${momentDescription} ${moment > 0 ? '(반시계)' : moment < 0 ? '(시계)' : '(0)'}\n`;
+                });
+                
+                explanation += `총 모멘트: ${totalMoment.toFixed(1)} → ${rotates ? '회전함' : '평형 (회전하지 않음)'}\n\n`;
+            });
+
+            const correctAnswer = rotatingCases.join(', ');
+            explanation += `정답: ${correctAnswer || '없음 (모두 평형상태)'}`;
+
+            return explanation;
+        }
+
+        // 페이지 로드 시 첫 문제 생성
+        window.onload = function() {
+            createSingleProblem();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>등가원리 물리 시뮬레이션</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .problem-section {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4a90e2;
+        }
+        
+        .problem-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .diagram-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 20px 0;
+            gap: 20px;
+        }
+        
+        .elevator-diagram {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .elevator {
+            width: 80px;
+            height: 120px;
+            border: 3px solid #333;
+            border-radius: 5px;
+            position: relative;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+        }
+        
+        .person {
+            width: 30px;
+            height: 40px;
+            background: #ff6b6b;
+            border-radius: 15px 15px 5px 5px;
+            position: relative;
+            margin-top: 5px;
+        }
+        
+        .person::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 15px;
+            background: #ffcc70;
+            border-radius: 50%;
+        }
+        
+        .scale {
+            width: 40px;
+            height: 8px;
+            background: #2c3e50;
+            border-radius: 2px;
+            margin-top: 5px;
+        }
+        
+        .diagram-label {
+            font-weight: bold;
+            color: #2980b9;
+            margin: 5px 0;
+        }
+        
+        .graph-diagram {
+            flex: 2;
+            text-align: center;
+        }
+        
+        .graph-container {
+            position: relative;
+            width: 250px;
+            height: 180px;
+            margin: 0 auto 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .options-section {
+            background: #fff;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .option:hover {
+            background: #e9ecef;
+        }
+        
+        .option.selected {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .new-problem-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+        }
+        
+        .check-answer-btn {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+            color: white;
+        }
+        
+        .check-answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(81,207,102,0.4);
+        }
+        
+        .answer-section {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            display: none;
+        }
+        
+        .answer-text {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .feedback-section {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .explanation-section {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            color: #856404;
+            display: none;
+        }
+        
+        .explanation {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>등가원리 시뮬레이션</h1>
+        </div>
+        
+        <div class="content">
+            <div class="problem-section">
+                <div class="problem-title">문제</div>
+                <div id="problemText"></div>
+                
+                <div class="diagram-container">
+                    <div class="elevator-diagram">
+                        <div class="elevator">
+                            <div class="person"></div>
+                            <div class="scale"></div>
+                        </div>
+                        <div class="diagram-label">(가)</div>
+                    </div>
+                    
+                    <div class="graph-diagram">
+                        <div class="graph-container">
+                            <canvas id="graphCanvas" width="250" height="180"></canvas>
+                        </div>
+                        <div class="diagram-label">(나)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="options-section">
+                <div><strong>&lt;보기&gt;</strong></div>
+                <div class="option" onclick="toggleOption('A')" id="optionA"></div>
+                <div class="option" onclick="toggleOption('B')" id="optionB"></div>
+                <div class="option" onclick="toggleOption('C')" id="optionC"></div>
+            </div>
+            
+            <button class="button new-problem-btn" onclick="generateNewProblem()">새 문제</button>
+            <button class="button check-answer-btn" onclick="submitAnswer()">답 확인</button>
+            
+            <div class="answer-section" id="answerSection">
+                <div class="answer-text" id="answerText"></div>
+            </div>
+            
+            <div class="feedback-section" id="feedbackSection">
+                <div id="feedbackText"></div>
+            </div>
+            
+            <div class="explanation-section" id="explanationSection">
+                <div class="explanation" id="explanationText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        let selectedOptions = [];
+        
+        const problems = [
+            {
+                timeDesc: "0초에서 위로 등가속도 운동을 시작하여 3초까지 계속하고, 3초부터 6초까지 등속운동한 후, 6초부터 9초까지 아래로 등가속도 운동",
+                segments: [
+                    { startTime: 0, endTime: 3, weight: 720 },
+                    { startTime: 3, endTime: 6, weight: 600 },
+                    { startTime: 6, endTime: 9, weight: 480 }
+                ],
+                maxTime: 9,
+                yTicks: [400, 480, 560, 640, 720, 800],
+                optionA: "0~3초 구간에서 관성력은 아래쪽으로 작용한다.",
+                optionB: "3~6초 구간에서 엘리베이터는 위쪽으로 운동한다.",
+                optionC: "6~9초 구간에서 사람이 받는 관성력의 크기는 120N이다.",
+                correctAnswer: ["A", "B", "C"],
+                explanation: "0~3초: 위로 가속하므로 관성력은 아래쪽으로 작용합니다. 3~6초: 위쪽으로 등속운동합니다. 6~9초: 아래로 가속하므로 관성력은 위쪽으로 작용하며, 크기는 600N-480N=120N입니다.",
+                hint: "관성력은 가속도의 반대 방향으로 작용하며, 관성력의 크기는 실제 몸무게와 측정 무게의 차이입니다."
+            },
+            {
+                timeDesc: "0초에서 아래로 등가속도 운동을 시작하여 3초까지 계속하고, 3초부터 6초까지 등속운동한 후, 6초부터 9초까지 위로 등가속도 운동",
+                segments: [
+                    { startTime: 0, endTime: 3, weight: 480 },
+                    { startTime: 3, endTime: 6, weight: 600 },
+                    { startTime: 6, endTime: 9, weight: 720 }
+                ],
+                maxTime: 9,
+                yTicks: [400, 480, 560, 640, 720, 800],
+                optionA: "0~3초 구간에서 엘리베이터는 아래쪽으로 운동한다.",
+                optionB: "3~6초 구간에서 관성력은 작용하지 않는다.",
+                optionC: "6~9초 구간에서 사람이 받는 관성력은 아래쪽으로 작용한다.",
+                correctAnswer: ["A", "B", "C"],
+                explanation: "0~3초: 무게가 감소하므로 아래쪽으로 가속합니다. 3~6초: 등속운동하므로 관성력이 작용하지 않습니다. 6~9초: 위로 가속하므로 관성력은 아래쪽으로 작용합니다.",
+                hint: "무게 감소는 아래쪽 가속, 무게 증가는 위쪽 가속을 의미하며, 관성력은 가속도의 반대 방향입니다."
+            },
+            {
+                timeDesc: "0초에서 위로 등가속도 운동을 시작하여 2초까지 계속하고, 2초부터 6초까지 등속운동한 후, 6초부터 8초까지 아래로 등가속도 운동",
+                segments: [
+                    { startTime: 0, endTime: 2, weight: 800 },
+                    { startTime: 2, endTime: 6, weight: 600 },
+                    { startTime: 6, endTime: 8, weight: 400 }
+                ],
+                maxTime: 8,
+                yTicks: [300, 400, 500, 600, 700, 800, 900],
+                optionA: "0~2초 구간에서 사람이 받는 관성력의 크기는 200N이다.",
+                optionB: "2~6초 구간에서 엘리베이터는 위쪽으로 운동한다.",
+                optionC: "6~8초 구간에서 관성력은 위쪽으로 작용한다.",
+                correctAnswer: ["A", "B", "C"],
+                explanation: "0~2초: 관성력은 800N-600N=200N입니다. 2~6초: 위쪽으로 등속운동합니다. 6~8초: 아래로 가속하므로 관성력은 위쪽으로 작용합니다.",
+                hint: "관성력의 크기는 실제 몸무게와 측정 무게의 차이이며, 등속운동할 때는 가속도가 0입니다."
+            },
+            {
+                timeDesc: "0초에서 아래로 등가속도 운동을 시작하여 2초까지 계속하고, 2초부터 5초까지 등속운동한 후, 5초부터 8초까지 위로 등가속도 운동",
+                segments: [
+                    { startTime: 0, endTime: 2, weight: 450 },
+                    { startTime: 2, endTime: 5, weight: 600 },
+                    { startTime: 5, endTime: 8, weight: 750 }
+                ],
+                maxTime: 8,
+                yTicks: [400, 450, 500, 550, 600, 650, 700, 750, 800],
+                optionA: "0~2초 구간에서 엘리베이터는 위쪽으로 운동한다.",
+                optionB: "2~5초 구간에서 관성력은 0이다.",
+                optionC: "5~8초 구간에서 사람이 받는 관성력의 크기는 150N이다.",
+                correctAnswer: ["B", "C"],
+                explanation: "0~2초: 무게가 감소하므로 아래쪽으로 가속합니다. 2~5초: 등속운동하므로 관성력은 0입니다. 5~8초: 관성력은 750N-600N=150N입니다.",
+                hint: "무게 변화로 가속도 방향을 알 수 있고, 등속운동할 때는 관성력이 0입니다."
+            },
+            {
+                timeDesc: "0초에서 위로 등가속도 운동을 시작하여 3초까지 계속하고, 3초부터 7초까지 등속운동한 후, 7초부터 10초까지 아래로 등가속도 운동",
+                segments: [
+                    { startTime: 0, endTime: 3, weight: 720 },
+                    { startTime: 3, endTime: 7, weight: 600 },
+                    { startTime: 7, endTime: 10, weight: 480 }
+                ],
+                maxTime: 10,
+                yTicks: [400, 480, 560, 640, 720, 800],
+                optionA: "0~3초 구간에서 관성력은 아래쪽으로 작용한다.",
+                optionB: "3~7초 구간에서 엘리베이터는 위쪽으로 운동한다.",
+                optionC: "7~10초 구간에서 사람이 받는 관성력은 아래쪽으로 작용한다.",
+                correctAnswer: ["A", "B"],
+                explanation: "0~3초: 위로 가속하므로 관성력은 아래쪽으로 작용합니다. 3~7초: 위쪽으로 등속운동합니다. 7~10초: 아래로 가속하므로 관성력은 위쪽으로 작용합니다.",
+                hint: "관성력은 가속도의 반대 방향으로 작용하며, 등속운동할 때는 가속도가 0입니다."
+            },
+            {
+                timeDesc: "0초에서 위로 등가속도 운동을 시작하여 4초까지 계속하고, 4초부터 8초까지 등속운동한 후, 8초부터 12초까지 아래로 등가속도 운동",
+                segments: [
+                    { startTime: 0, endTime: 4, weight: 660 },
+                    { startTime: 4, endTime: 8, weight: 600 },
+                    { startTime: 8, endTime: 12, weight: 540 }
+                ],
+                maxTime: 12,
+                yTicks: [500, 540, 580, 620, 660, 700],
+                optionA: "0~4초 구간에서 관성력은 위쪽으로 작용한다.",
+                optionB: "4~8초 구간에서 엘리베이터는 위쪽으로 운동한다.",
+                optionC: "8~12초 구간에서 사람이 받는 관성력의 크기는 60N이다.",
+                correctAnswer: ["B", "C"],
+                explanation: "0~4초: 위로 가속하므로 관성력은 아래쪽으로 작용합니다. 4~8초: 위쪽으로 등속운동합니다. 8~12초: 아래로 가속하므로 관성력은 위쪽으로 작용하며, 크기는 600N-540N=60N입니다.",
+                hint: "관성력은 가속도의 반대 방향으로 작용하며, 관성력의 크기는 실제 몸무게와 측정 무게의 차이입니다."
+            }
+        ];
+        
+        function generateNewProblem() {
+            currentProblem = problems[Math.floor(Math.random() * problems.length)];
+            selectedOptions = [];
+            
+            document.getElementById('problemText').innerHTML = `
+                그림 (가)는 엘리베이터 안에서 사람이 저울 위에 서 있는 모습을 나타낸 것이고 그림 (나)는 엘리베이터가 운동할 때, 저울에 측정되는 무게를 시간에 따라 나타낸 것이다. 엘리베이터는 0초일때 출발하고 ${currentProblem.maxTime}초에서 정지한다. 엘리베이터의 운동에 대한 설명으로 옳은것만을 &lt;보기&gt;에서 있는대로 고른 것은?
+            `;
+            
+            drawGraph();
+            
+            document.getElementById('optionA').innerHTML = `<strong>ㄱ.</strong> ${currentProblem.optionA}`;
+            document.getElementById('optionB').innerHTML = `<strong>ㄴ.</strong> ${currentProblem.optionB}`;
+            document.getElementById('optionC').innerHTML = `<strong>ㄷ.</strong> ${currentProblem.optionC}`;
+            
+            // Reset selections
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Hide all result sections
+            document.getElementById('answerSection').style.display = 'none';
+            document.getElementById('feedbackSection').style.display = 'none';
+            document.getElementById('explanationSection').style.display = 'none';
+        }
+        
+        function drawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+            const width = canvas.width - margin.left - margin.right;
+            const height = canvas.height - margin.top - margin.bottom;
+            
+            const maxTime = currentProblem.maxTime;
+            const yTickValues = currentProblem.yTicks;
+            const minWeight = Math.min(...yTickValues);
+            const maxWeight = Math.max(...yTickValues);
+            const weightRange = maxWeight - minWeight;
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            
+            // Draw vertical grid lines (time)
+            for (let i = 0; i <= maxTime; i += maxTime <= 6 ? 1 : 2) {
+                const x = margin.left + (i / maxTime) * width;
+                ctx.beginPath();
+                ctx.moveTo(x, margin.top);
+                ctx.lineTo(x, margin.top + height);
+                ctx.stroke();
+            }
+            
+            // Draw horizontal grid lines (weight)
+            yTickValues.forEach(weight => {
+                const y = margin.top + height - ((weight - minWeight) / weightRange * height);
+                ctx.beginPath();
+                ctx.moveTo(margin.left, y);
+                ctx.lineTo(margin.left + width, y);
+                ctx.stroke();
+            });
+            
+            // Reset line dash for axes
+            ctx.setLineDash([]);
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // Y-axis
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, margin.top + height);
+            // X-axis
+            ctx.lineTo(margin.left + width, margin.top + height);
+            ctx.stroke();
+            
+            // Draw graph lines
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            
+            currentProblem.segments.forEach((segment, index) => {
+                const startX = margin.left + (segment.startTime / maxTime) * width;
+                const endX = margin.left + (segment.endTime / maxTime) * width;
+                const y = margin.top + height - ((segment.weight - minWeight) / weightRange * height);
+                
+                // Draw horizontal line
+                ctx.beginPath();
+                ctx.moveTo(startX, y);
+                ctx.lineTo(endX, y);
+                ctx.stroke();
+                
+                // Draw vertical connecting lines between segments
+                if (index > 0) {
+                    const prevSegment = currentProblem.segments[index - 1];
+                    const prevY = margin.top + height - ((prevSegment.weight - minWeight) / weightRange * height);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(startX, prevY);
+                    ctx.lineTo(startX, y);
+                    ctx.stroke();
+                }
+            });
+            
+            // Draw X-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= maxTime; i += maxTime <= 6 ? 1 : 2) {
+                const x = margin.left + (i / maxTime) * width;
+                ctx.fillText(i.toString(), x, margin.top + height + 20);
+            }
+            
+            // Draw Y-axis labels
+            ctx.textAlign = 'right';
+            yTickValues.forEach(weight => {
+                const y = margin.top + height - ((weight - minWeight) / weightRange * height);
+                ctx.fillText(weight.toString(), margin.left - 10, y + 4);
+            });
+            
+            // Draw axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('시간(s)', margin.left + width/2, canvas.height - 5);
+            
+            ctx.save();
+            ctx.translate(15, margin.top + height/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('무게(N)', 0, 0);
+            ctx.restore();
+        }
+        
+        function toggleOption(option) {
+            const optionElement = document.getElementById(`option${option}`);
+            
+            if (selectedOptions.includes(option)) {
+                selectedOptions = selectedOptions.filter(o => o !== option);
+                optionElement.classList.remove('selected');
+            } else {
+                selectedOptions.push(option);
+                optionElement.classList.add('selected');
+            }
+        }
+        
+        function submitAnswer() {
+            if (selectedOptions.length === 0) {
+                alert('답을 선택해주세요!');
+                return;
+            }
+            
+            const feedbackSection = document.getElementById('feedbackSection');
+            const feedbackText = document.getElementById('feedbackText');
+            const explanationSection = document.getElementById('explanationSection');
+            const explanationText = document.getElementById('explanationText');
+            
+            const isCorrect = selectedOptions.length === currentProblem.correctAnswer.length &&
+                            selectedOptions.every(opt => currentProblem.correctAnswer.includes(opt));
+            
+            if (isCorrect) {
+                feedbackSection.className = 'feedback-section correct';
+                feedbackText.innerHTML = '<strong>정답입니다! 🎉</strong>';
+                explanationText.innerHTML = `<strong>해설:</strong><br>${currentProblem.explanation}`;
+            } else {
+                feedbackSection.className = 'feedback-section incorrect';  
+                feedbackText.innerHTML = '<strong>틀렸습니다. 😅</strong>';
+                explanationText.innerHTML = `<strong>힌트:</strong><br>${currentProblem.hint}`;
+            }
+            
+            feedbackSection.style.display = 'block';
+            explanationSection.style.display = 'block';
+        }
+        
+        // 페이지 로드시 첫 번째 문제 생성
+        generateNewProblem();
+    </script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 등속원운동 시뮬레이션 ✨</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ffd700, #ffff00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sparkle 2s ease-in-out infinite alternate;
+        }
+        @keyframes sparkle {
+            0% { filter: brightness(1) drop-shadow(0 0 5px #ffd700); }
+            100% { filter: brightness(1.2) drop-shadow(0 0 15px #ffd700); }
+        }
+        .simulation-area {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        #threejs-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 15px;
+            background: rgba(0,0,0,0.8);
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .control-group {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .slider-container {
+            margin: 15px 0;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #ffd700, #ff6b6b);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ffff00);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,215,0,0.8);
+        }
+        .value-display {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ffd700);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(255,107,107,0.6);
+        }
+        .problem-section {
+            background: rgba(255,255,255,0.15);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .problem-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        .answer-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .option-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid transparent;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .option-btn:hover {
+            border-color: #ffd700;
+            background: rgba(255,215,0,0.2);
+        }
+        .option-btn.correct {
+            border-color: #4ade80;
+            background: rgba(74,222,128,0.3);
+        }
+        .option-btn.incorrect {
+            border-color: #f87171;
+            background: rgba(248,113,113,0.3);
+        }
+        .camera-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ 3D 등속원운동 시뮬레이션 ✨</h1>
+        
+        <div class="simulation-area">
+            <div id="threejs-container">
+                <div class="camera-controls">
+                    🖱️ 마우스로 회전 | 휠로 줌 | 우클릭으로 이동
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <h3>🎛️ 시뮬레이션 제어</h3>
+                    <div class="slider-container">
+                        <label>원운동 반지름: <span class="value-display" id="radiusValue">0.4 m</span></label>
+                        <input type="range" id="radiusSlider" min="0.2" max="0.8" step="0.1" value="0.4">
+                    </div>
+                    <div class="slider-container">
+                        <label>원운동 속력: <span class="value-display" id="speedValue">2.0 m/s</span></label>
+                        <input type="range" id="speedSlider" min="1.0" max="4.0" step="0.1" value="2.0">
+                    </div>
+                    <div class="slider-container">
+                        <label>매달린 물체 질량: <span class="value-display" id="massValue">1.0 kg</span></label>
+                        <input type="range" id="massSlider" min="0.5" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <button onclick="generateRandomProblem()">🎲 새 문제 생성</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>📊 물리량 정보</h3>
+                    <div>구심력: <span class="value-display" id="centripetalForce">10.0 N</span></div>
+                    <div>각속도: <span class="value-display" id="angularVelocity">5.0 rad/s</span></div>
+                    <div>주기: <span class="value-display" id="period">1.26 s</span></div>
+                    <div>장력: <span class="value-display" id="tension">20.0 N</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-section">
+            <h2>🧮 문제를 풀어보세요!</h2>
+            <p id="problemText">문제가 생성됩니다...</p>
+            <div class="answer-options" id="answerOptions"></div>
+            <div id="result" style="margin-top: 15px; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Three.js 변수들
+        let scene, camera, renderer, controls;
+        let desk, apparatus, orbitalBall, hangingBall, string1, string2;
+        let orbitalTrail = [];
+        let particles = [];
+        
+        // 시뮬레이션 변수들
+        let radius = 0.4; // 원운동 반지름 (m)
+        let speed = 2.0; // 원운동 속력 (m/s)
+        let hangingMass = 1.0; // 매달린 물체 질량 (kg)
+        let angle = 0; // 원운동 각도
+        const g = 10; // 중력가속도 (m/s²)
+        const scale = 2; // 3D 스케일
+        
+        // 간단한 OrbitControls 구현
+        class SimpleOrbitControls {
+            constructor(camera, domElement) {
+                this.camera = camera;
+                this.domElement = domElement;
+                this.isMouseDown = false;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.phi = 0;
+                this.theta = Math.PI / 4;
+                this.radius = 8;
+                this.target = new THREE.Vector3(0, 0, 0);
+                
+                this.setupEventListeners();
+                this.update();
+            }
+            
+            setupEventListeners() {
+                this.domElement.addEventListener('mousedown', (e) => {
+                    this.isMouseDown = true;
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                });
+                
+                this.domElement.addEventListener('mouseup', () => {
+                    this.isMouseDown = false;
+                });
+                
+                this.domElement.addEventListener('mousemove', (e) => {
+                    if (!this.isMouseDown) return;
+                    
+                    const deltaX = e.clientX - this.mouseX;
+                    const deltaY = e.clientY - this.mouseY;
+                    
+                    this.phi -= deltaX * 0.01;
+                    this.theta = Math.max(0.1, Math.min(Math.PI - 0.1, this.theta - deltaY * 0.01));
+                    
+                    this.mouseX = e.clientX;
+                    this.mouseY = e.clientY;
+                    
+                    this.update();
+                });
+                
+                this.domElement.addEventListener('wheel', (e) => {
+                    this.radius = Math.max(3, Math.min(15, this.radius + e.deltaY * 0.01));
+                    this.update();
+                    e.preventDefault();
+                });
+            }
+            
+            update() {
+                const x = this.radius * Math.sin(this.theta) * Math.cos(this.phi);
+                const y = this.radius * Math.cos(this.theta);
+                const z = this.radius * Math.sin(this.theta) * Math.sin(this.phi);
+                
+                this.camera.position.set(x, y, z);
+                this.camera.lookAt(this.target);
+            }
+        }
+        
+        function initThreeJS() {
+            const container = document.getElementById('threejs-container');
+            
+            // Scene 생성
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000814);
+            
+            // Camera 생성
+            camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            
+            // Renderer 생성
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            
+            // Controls 생성
+            controls = new SimpleOrbitControls(camera, renderer.domElement);
+            
+            // 조명 설정
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x00ffff, 0.5);
+            pointLight.position.set(0, 3, 0);
+            scene.add(pointLight);
+            
+            createObjects();
+            animate();
+        }
+        
+        function createObjects() {
+            // 바닥
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // 책상
+            const deskGeometry = new THREE.BoxGeometry(4, 0.1, 3);
+            const deskMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            desk = new THREE.Mesh(deskGeometry, deskMaterial);
+            desk.position.set(0, 0, 0);
+            desk.castShadow = true;
+            desk.receiveShadow = true;
+            scene.add(desk);
+            
+            // 책상 다리들
+            const legGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1.5);
+            const legMaterial = new THREE.MeshLambertMaterial({ color: 0x654321 });
+            
+            const legPositions = [
+                [-1.8, -0.8, -1.3],
+                [1.8, -0.8, -1.3],
+                [-1.8, -0.8, 1.3],
+                [1.8, -0.8, 1.3]
+            ];
+            
+            legPositions.forEach(pos => {
+                const leg = new THREE.Mesh(legGeometry, legMaterial);
+                leg.position.set(...pos);
+                leg.castShadow = true;
+                scene.add(leg);
+            });
+            
+            // 실험 장치 받침대
+            const baseGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.1);
+            const baseMaterial = new THREE.MeshLambertMaterial({ color: 0x666666 });
+            const base = new THREE.Mesh(baseGeometry, baseMaterial);
+            base.position.set(0, 0.1, 0);
+            base.castShadow = true;
+            scene.add(base);
+            
+            // 중심 기둥
+            const poleGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1);
+            const poleMaterial = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+            const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+            pole.position.set(0, 0.65, 0);
+            pole.castShadow = true;
+            scene.add(pole);
+            
+            // 원운동하는 물체 (보석같은 효과)
+            const orbitalGeometry = new THREE.SphereGeometry(0.08);
+            const orbitalMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x00FFFF,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.9
+            });
+            orbitalBall = new THREE.Mesh(orbitalGeometry, orbitalMaterial);
+            orbitalBall.castShadow = true;
+            scene.add(orbitalBall);
+            
+            // 매달린 물체 (귀여운 디자인)
+            const hangingGeometry = new THREE.SphereGeometry(0.1);
+            const hangingMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xFFD700,
+                shininess: 80
+            });
+            hangingBall = new THREE.Mesh(hangingGeometry, hangingMaterial);
+            hangingBall.position.set(0, -0.5, 0);
+            hangingBall.castShadow = true;
+            scene.add(hangingBall);
+            
+            // 실 (LineBasicMaterial 사용)
+            const stringMaterial = new THREE.LineBasicMaterial({ color: 0xFFFFFF, linewidth: 3 });
+            
+            // 원운동 물체와 중심을 연결하는 실
+            const stringGeometry1 = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 1.15, 0),
+                new THREE.Vector3(0, 1.15, 0)
+            ]);
+            string1 = new THREE.Line(stringGeometry1, stringMaterial);
+            scene.add(string1);
+            
+            // 중심에서 매달린 물체를 연결하는 실
+            const stringGeometry2 = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 1.15, 0),
+                new THREE.Vector3(0, -0.5, 0)
+            ]);
+            string2 = new THREE.Line(stringGeometry2, stringMaterial);
+            scene.add(string2);
+            
+            // 궤도 표시 (점선)
+            const points = [];
+            for (let i = 0; i <= 64; i++) {
+                const theta = (i / 64) * Math.PI * 2;
+                points.push(new THREE.Vector3(
+                    Math.cos(theta) * radius * scale,
+                    1.15,
+                    Math.sin(theta) * radius * scale
+                ));
+            }
+            const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const orbitMaterial = new THREE.LineDashedMaterial({ 
+                color: 0x00FFFF, 
+                linewidth: 2,
+                dashSize: 0.1,
+                gapSize: 0.05
+            });
+            const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+            orbitLine.computeLineDistances();
+            scene.add(orbitLine);
+        }
+        
+        function updateSimulation() {
+            // 각속도 계산
+            const angularVelocity = speed / radius;
+            angle += angularVelocity * 0.02; // 시간 간격
+            
+            // 원운동하는 물체 위치 업데이트
+            const orbitalX = Math.cos(angle) * radius * scale;
+            const orbitalZ = Math.sin(angle) * radius * scale;
+            const orbitalY = 1.15;
+            
+            orbitalBall.position.set(orbitalX, orbitalY, orbitalZ);
+            
+            // 실 업데이트
+            const stringPoints1 = [
+                new THREE.Vector3(0, 1.15, 0),
+                new THREE.Vector3(orbitalX, orbitalY, orbitalZ)
+            ];
+            string1.geometry.setFromPoints(stringPoints1);
+            
+            // 물리량 계산
+            const centripetalForce = hangingMass * speed * speed / radius;
+            const period = 2 * Math.PI / angularVelocity;
+            const tension = hangingMass * g + centripetalForce;
+            
+            // UI 업데이트
+            document.getElementById('centripetalForce').textContent = centripetalForce.toFixed(1) + ' N';
+            document.getElementById('angularVelocity').textContent = angularVelocity.toFixed(1) + ' rad/s';
+            document.getElementById('period').textContent = period.toFixed(2) + ' s';
+            document.getElementById('tension').textContent = tension.toFixed(1) + ' N';
+            
+            // 파티클 효과 (간단한 구현)
+            if (Math.random() < 0.1) {
+                const particleGeometry = new THREE.SphereGeometry(0.01);
+                const particleMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x00FFFF,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                particle.position.copy(orbitalBall.position);
+                particle.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.02,
+                    (Math.random() - 0.5) * 0.02,
+                    (Math.random() - 0.5) * 0.02
+                );
+                particle.life = 1.0;
+                particles.push(particle);
+                scene.add(particle);
+            }
+            
+            // 파티클 업데이트
+            particles = particles.filter(particle => {
+                particle.position.add(particle.velocity);
+                particle.life -= 0.02;
+                particle.material.opacity = particle.life;
+                
+                if (particle.life <= 0) {
+                    scene.remove(particle);
+                    return false;
+                }
+                return true;
+            });
+            
+            // 궤도 업데이트
+            const orbitPoints = [];
+            for (let i = 0; i <= 64; i++) {
+                const theta = (i / 64) * Math.PI * 2;
+                orbitPoints.push(new THREE.Vector3(
+                    Math.cos(theta) * radius * scale,
+                    1.15,
+                    Math.sin(theta) * radius * scale
+                ));
+            }
+            const orbitLine = scene.children.find(child => child.material && child.material.type === 'LineDashedMaterial');
+            if (orbitLine) {
+                orbitLine.geometry.setFromPoints(orbitPoints);
+                orbitLine.computeLineDistances();
+            }
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            updateSimulation();
+            renderer.render(scene, camera);
+        }
+        
+        // 슬라이더 이벤트 리스너
+        document.getElementById('radiusSlider').addEventListener('input', function() {
+            radius = parseFloat(this.value);
+            document.getElementById('radiusValue').textContent = radius.toFixed(1) + ' m';
+        });
+        
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            speed = parseFloat(this.value);
+            document.getElementById('speedValue').textContent = speed.toFixed(1) + ' m/s';
+        });
+        
+        document.getElementById('massSlider').addEventListener('input', function() {
+            hangingMass = parseFloat(this.value);
+            document.getElementById('massValue').textContent = hangingMass.toFixed(1) + ' kg';
+            
+            // 매달린 물체 크기 조절
+            if (hangingBall) {
+                const scale = Math.max(0.08, 0.05 + hangingMass * 0.03);
+                hangingBall.scale.set(scale * 10, scale * 10, scale * 10);
+            }
+        });
+        
+        // 문제 생성 함수
+        function generateRandomProblem() {
+            // 랜덤 값 생성
+            const randomRadius = (Math.random() * 0.6 + 0.2).toFixed(1); // 0.2 ~ 0.8
+            const randomSpeed = (Math.random() * 3 + 1).toFixed(1); // 1.0 ~ 4.0
+            const randomMass = (Math.random() * 2.5 + 0.5).toFixed(1); // 0.5 ~ 3.0
+            
+            // 슬라이더 값 업데이트
+            document.getElementById('radiusSlider').value = randomRadius;
+            document.getElementById('speedSlider').value = randomSpeed;
+            document.getElementById('massSlider').value = randomMass;
+            
+            radius = parseFloat(randomRadius);
+            speed = parseFloat(randomSpeed);
+            hangingMass = parseFloat(randomMass);
+            
+            // UI 업데이트
+            document.getElementById('radiusValue').textContent = radius.toFixed(1) + ' m';
+            document.getElementById('speedValue').textContent = speed.toFixed(1) + ' m/s';
+            document.getElementById('massValue').textContent = hangingMass.toFixed(1) + ' kg';
+            
+            // 정답 계산
+            const correctAnswer = hangingMass * g;
+            
+            // 문제 텍스트 생성
+            const problemText = `반지름 ${radius}m인 수평면에서 속력 ${speed}m/s로 등속원운동을 하는 물체와 실로 연결된 물체 A가 마찰이 없는 수평면에서 정지해 있다. 매달린 물체의 질량이 ${hangingMass}kg일 때, 물체 A의 질량은? (중력가속도 g = 10m/s²)`;
+            
+            document.getElementById('problemText').textContent = problemText;
+            
+            // 선택지 생성
+            const options = [];
+            options.push(correctAnswer);
+            
+            while (options.length < 5) {
+                const variation = (Math.random() * 3 - 1.5);
+                const option = Math.max(0.1, correctAnswer + variation);
+                if (!options.some(opt => Math.abs(opt - option) < 0.1)) {
+                    options.push(option);
+                }
+            }
+            
+            // 선택지 섞기
+            options.sort(() => Math.random() - 0.5);
+            
+            // 선택지 버튼 생성
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option.toFixed(1) + ' kg';
+                btn.onclick = () => checkAnswer(option, correctAnswer, btn);
+                optionsContainer.appendChild(btn);
+            });
+            
+            // 결과 초기화
+            document.getElementById('result').textContent = '';
+        }
+        
+        function checkAnswer(selected, correct, button) {
+            const allButtons = document.querySelectorAll('.option-btn');
+            allButtons.forEach(btn => {
+                btn.onclick = null;
+                if (parseFloat(btn.textContent) === correct) {
+                    btn.classList.add('correct');
+                } else {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            const result = document.getElementById('result');
+            if (Math.abs(selected - correct) < 0.01) {
+                result.textContent = '🎉 정답입니다! 물체 A의 질량 = 매달린 물체의 무게 = mg = ' + correct.toFixed(1) + ' kg';
+                result.style.color = '#4ade80';
+            } else {
+                result.textContent = '❌틀렸습니다. 정답은 ' + correct.toFixed(1) + ' kg입니다. 등속원운동에서 구심력 = 장력 = mg입니다.';
+                result.style.color = '#f87171';
+            }
+        }
+        
+        // 윈도우 리사이즈 처리
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('threejs-container');
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+        });
+        
+        // 초기화
+        window.addEventListener('load', () => {
+            initThreeJS();
+            generateRandomProblem();
+        });
+    </script>
+</body>
+</html>

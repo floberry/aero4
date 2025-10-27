@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>돌림힘 계산 문제</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 0.85em;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+
+        .problem-number {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .diagram-section {
+            padding: 20px;
+            background: white;
+        }
+
+        .wrench-container {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            background: #fafbfc;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .wrench {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        .wrench-handle {
+            background: #7f8c8d;
+            height: 6px;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .wrench-head {
+            width: 35px;
+            height: 25px;
+            background: #34495e;
+            border-radius: 12px 0 0 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #2c3e50;
+        }
+
+        .pivot-point {
+            width: 6px;
+            height: 6px;
+            background: #e74c3c;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #c0392b;
+        }
+
+        .pivot-label {
+            position: absolute;
+            left: -15px;
+            bottom: -20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .force-arrow {
+            position: absolute;
+            right: -35px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-30deg);
+            transform-origin: left center;
+        }
+
+        .arrow-line {
+            width: 45px;
+            height: 2px;
+            background: #e74c3c;
+            position: relative;
+        }
+
+        .arrow-head {
+            position: absolute;
+            right: -6px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #e74c3c;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .force-label {
+            position: absolute;
+            right: -15px;
+            top: -20px;
+            background: #e74c3c;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .angle-arc {
+            position: absolute;
+            right: -12px;
+            top: 5px;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #34495e;
+            border-radius: 50%;
+            border-top: none;
+            border-left: none;
+        }
+
+        .angle-label {
+            position: absolute;
+            right: -8px;
+            top: 12px;
+            font-size: 10px;
+            color: #34495e;
+            font-weight: bold;
+        }
+
+        .distance-line {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #3498db;
+        }
+
+        .distance-label {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3498db;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .problem-text {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .problem-text h3 {
+            color: #17a2b8;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .problem-text p {
+            font-size: 0.95em;
+            color: #495057;
+            line-height: 1.7;
+        }
+
+        .given-data {
+            background: #e8f4f8;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .given-data h4 {
+            color: #0c5460;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .data-item {
+            font-size: 0.85em;
+            color: #0c5460;
+            margin-bottom: 3px;
+        }
+
+        .formula-hint {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .formula-hint h4 {
+            color: #856404;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .formula {
+            font-family: 'Times New Roman', serif;
+            font-size: 0.9em;
+            color: #533b00;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .options-container {
+            padding: 0 20px 20px 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .option-number {
+            background: #6c757d;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .option:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .option.correct {
+            background: #d1ecf1;
+            border-color: #28a745;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .option.correct .option-number {
+            background: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+            animation: shake 0.5s ease;
+        }
+
+        .option.incorrect .option-number {
+            background: #dc3545;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); background: #28a745; color: white; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+
+        .feedback {
+            margin: 15px 20px 20px 20px;
+            padding: 15px;
+            border-radius: 8px;
+            animation: slideDown 0.4s ease;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .solution {
+            font-size: 0.85em;
+            line-height: 1.5;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>물리 II - 돌림힘</h1>
+            <div class="subtitle">Physics Problem Simulation</div>
+        </div>
+
+        <div class="problem-number" id="problem-number">
+            01. 다음 그림과 같이 길이 20 cm인 렌치를 이용해 10 N의 힘을 작용했을 때
+        </div>
+
+        <div class="diagram-section">
+            <div class="wrench-container">
+                <div class="wrench" id="wrench">
+                    <div class="wrench-head">
+                        <div class="pivot-point"></div>
+                        <div class="pivot-label">O</div>
+                    </div>
+                    <div class="wrench-handle" id="wrench-handle">
+                        <div class="distance-line"></div>
+                        <div class="distance-label" id="distance-label">20 cm</div>
+                    </div>
+                    <div class="force-arrow">
+                        <div class="arrow-line"></div>
+                        <div class="arrow-head"></div>
+                        <div class="force-label" id="force-label">F=10 N</div>
+                        <div class="angle-arc"></div>
+                        <div class="angle-label">30°</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="given-data">
+                <h4>📋 주어진 조건</h4>
+                <div class="data-item">• 렌치의 길이: <span id="given-distance">20 cm = 0.2 m</span></div>
+                <div class="data-item">• 작용하는 힘: <span id="given-force">F = 10 N</span></div>
+                <div class="data-item">• 힘의 방향: 렌치 끝에서 30° 방향</div>
+            </div>
+
+            <div class="formula-hint">
+                <h4>💡 돌림힘 공식</h4>
+                <div class="formula">τ = r × F × sin θ</div>
+            </div>
+
+            <div class="problem-text">
+                <h3>문제</h3>
+                <p>너트에 작용하는 돌림힘의 크기는 몇 N·m인가?</p>
+            </div>
+        </div>
+
+        <div class="options-container">
+            <div class="options" id="options">
+                <!-- 선택지가 동적으로 생성됩니다 -->
+            </div>
+            <div id="feedback"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="generateNewProblem()">다음 문제 →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentAnswer = 0;
+        let answered = false;
+        let problemNumber = 1;
+
+        function generateNewProblem() {
+            // 문제 번호 증가
+            problemNumber++;
+            
+            // 랜덤 값 생성 (실제 물리 문제에서 자주 사용되는 값들)
+            const distances = [15, 20, 25, 30, 35];  // cm
+            const forces = [8, 10, 12, 15, 20];      // N
+            
+            const distance = distances[Math.floor(Math.random() * distances.length)];
+            const force = forces[Math.floor(Math.random() * forces.length)];
+            
+            // 돌림힘 계산 (τ = r × F × sin(θ))
+            const distanceInM = distance / 100;
+            const angleInRad = Math.PI / 6; // 30도
+            const torque = distanceInM * force * Math.sin(angleInRad);
+            currentAnswer = Math.round(torque * 1000) / 1000; // 소수점 셋째자리까지
+            
+            // UI 업데이트
+            updateProblem(distance, force);
+            updateWrench(distance, force);
+            generateOptions(currentAnswer);
+            
+            // 피드백 초기화
+            document.getElementById('feedback').innerHTML = '';
+            answered = false;
+        }
+
+        function updateProblem(distance, force) {
+            // 문제 번호와 제목 업데이트
+            const problemText = `${String(problemNumber).padStart(2, '0')}. 다음 그림과 같이 길이 ${distance} cm인 렌치를 이용해 ${force} N의 힘을 작용했을 때`;
+            document.getElementById('problem-number').textContent = problemText;
+            
+            // 주어진 조건 업데이트
+            document.getElementById('given-distance').textContent = `${distance} cm = ${distance/100} m`;
+            document.getElementById('given-force').textContent = `F = ${force} N`;
+        }
+
+        function updateWrench(distance, force) {
+            const handle = document.getElementById('wrench-handle');
+            const wrench = document.getElementById('wrench');
+            
+            // 렌치 길이 조정 (15cm=60px ~ 35cm=140px)
+            const handleWidth = Math.max(60, Math.min(140, distance * 4));
+            handle.style.width = handleWidth + 'px';
+            
+            // 라벨 업데이트
+            document.getElementById('distance-label').textContent = distance + ' cm';
+            document.getElementById('force-label').textContent = `F=${force} N`;
+            
+            // 렌치가 화면을 넘지 않도록 조정
+            const containerWidth = document.querySelector('.wrench-container').offsetWidth;
+            const wrenchWidth = 35 + handleWidth + 70; // 헤드 + 핸들 + 화살표 여백
+            
+            if (wrenchWidth > containerWidth - 40) {
+                const scale = (containerWidth - 40) / wrenchWidth;
+                wrench.style.transform = `translateY(-50%) scale(${scale})`;
+            } else {
+                wrench.style.transform = 'translateY(-50%) scale(1)';
+            }
+        }
+
+        function generateOptions(correctAnswer) {
+            const options = [];
+            options.push(correctAnswer);
+            
+            // 일반적인 오답 패턴들 (물리 문제에서 자주 나오는 실수들)
+            const wrongAnswers = [
+                correctAnswer * 2,      // sin θ를 안 곱한 경우
+                correctAnswer / 0.5,    // sin 30° = 0.5를 나눈 경우  
+                correctAnswer * 0.75,   // 다른 각도 실수
+                correctAnswer * 1.5,    // 계산 실수
+            ];
+            
+            // 오답들 중에서 선택
+            wrongAnswers.forEach(ans => {
+                const rounded = Math.round(ans * 1000) / 1000;
+                if (rounded > 0 && rounded !== correctAnswer && !options.includes(rounded)) {
+                    options.push(rounded);
+                }
+            });
+            
+            // 5개 선택지 맞추기
+            while (options.length < 5) {
+                let newAnswer = correctAnswer + (Math.random() - 0.5) * correctAnswer * 0.8;
+                newAnswer = Math.round(newAnswer * 1000) / 1000;
+                if (newAnswer > 0 && !options.includes(newAnswer)) {
+                    options.push(newAnswer);
+                }
+            }
+            
+            // 선택지 정렬 (작은 순서대로)
+            options.sort((a, b) => a - b);
+            
+            // HTML 생성
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            const optionLabels = ['①', '②', '③', '④', '⑤'];
+            
+            options.slice(0, 5).forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                
+                const numberSpan = document.createElement('span');
+                numberSpan.className = 'option-number';
+                numberSpan.textContent = index + 1;
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = `${option} N·m`;
+                
+                optionDiv.appendChild(numberSpan);
+                optionDiv.appendChild(textSpan);
+                optionDiv.onclick = () => checkAnswer(option, optionDiv);
+                
+                optionsContainer.appendChild(optionDiv);
+            });
+        }
+
+        function checkAnswer(selectedAnswer, selectedElement) {
+            if (answered) return;
+            
+            answered = true;
+            const allOptions = document.querySelectorAll('.option');
+            
+            allOptions.forEach(option => {
+                option.classList.add('disabled');
+                const value = parseFloat(option.querySelector('span:last-child').textContent);
+                if (Math.abs(value - currentAnswer) < 0.001) {
+                    option.classList.add('correct');
+                } else {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // 상세한 피드백 표시
+            const feedbackDiv = document.getElementById('feedback');
+            const isCorrect = Math.abs(selectedAnswer - currentAnswer) < 0.001;
+            
+            if (isCorrect) {
+                feedbackDiv.innerHTML = `
+                    <div class="feedback correct">
+                        <div class="feedback-title">✅ 정답입니다!</div>
+                        <div class="solution">
+                            <strong>풀이:</strong><br>
+                            τ = r × F × sin θ<br>
+                            τ = ${document.getElementById('given-distance').textContent.split(' = ')[1]} × ${document.getElementById('given-force').textContent.split(' = ')[1]} × sin 30°<br>
+                            τ = ${document.getElementById('given-distance').textContent.split(' = ')[1]} × ${document.getElementById('given-force').textContent.split(' = ')[1]} × 0.5<br>
+                            τ = <strong>${currentAnswer} N·m</strong>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feedbackDiv.innerHTML = `
+                    <div class="feedback incorrect">
+                        <div class="feedback-title">❌ 틀렸습니다.</div>
+                        <div class="solution">
+                            <strong>정답:</strong> ${currentAnswer} N·m<br><br>
+                            <strong>올바른 풀이:</strong><br>
+                            τ = r × F × sin θ<br>
+                            τ = ${document.getElementById('given-distance').textContent.split(' = ')[1]} × ${document.getElementById('given-force').textContent.split(' = ')[1]} × sin 30°<br>
+                            τ = ${document.getElementById('given-distance').textContent.split(' = ')[1]} × ${document.getElementById('given-force').textContent.split(' = ')[1]} × 0.5<br>
+                            τ = <strong>${currentAnswer} N·m</strong>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 초기 문제 생성
+        generateNewProblem();
+        problemNumber = 1; // 첫 문제는 01번으로 시작
+        updateProblem(20, 10); // 초기값 설정
+    </script>
+</body>
+</html>

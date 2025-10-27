@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>원운동 물리 시뮬레이션</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        .problem-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #2196F3;
+            position: relative;
+        }
+
+        .mascot {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .input-section {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .result.wrong {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .explanation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .formula {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            text-align: center;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌀 원운동 물리 문제</h1>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="350" height="300"></canvas>
+        </div>
+
+        <div class="controls">
+            <button onclick="newProblem()">🎲 새 문제</button>
+        </div>
+
+        <div class="problem-info" id="problemInfo">
+            문제를 생성하려면 '새 문제' 버튼을 클릭하세요.
+            <div class="mascot">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <!-- 클로버 -->
+                    <g transform="translate(35, 15)">
+                        <circle cx="0" cy="-3" r="3" fill="#4CAF50"/>
+                        <circle cx="3" cy="0" r="3" fill="#4CAF50"/>
+                        <circle cx="0" cy="3" r="3" fill="#4CAF50"/>
+                        <circle cx="-3" cy="0" r="3" fill="#4CAF50"/>
+                        <rect x="-0.5" y="3" width="1" height="4" fill="#2E7D32"/>
+                    </g>
+                    <!-- 캐릭터 얼굴 -->
+                    <circle cx="20" cy="30" r="12" fill="#E0E0E0"/>
+                    <!-- 눈 -->
+                    <circle cx="17" cy="27" r="2" fill="black"/>
+                    <circle cx="23" cy="27" r="2" fill="black"/>
+                    <circle cx="17.5" cy="26.5" r="0.5" fill="white"/>
+                    <circle cx="23.5" cy="26.5" r="0.5" fill="white"/>
+                    <!-- 입 -->
+                    <path d="M 18 32 Q 20 34 22 32" stroke="#FF6B6B" stroke-width="1.5" fill="none"/>
+                    <!-- 몸 -->
+                    <ellipse cx="20" cy="42" rx="8" ry="6" fill="#F5F5F5"/>
+                    <!-- 팔 -->
+                    <circle cx="15" cy="40" r="3" fill="#4CAF50"/>
+                    <circle cx="25" cy="40" r="3" fill="#4CAF50"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <label for="answer">물체 A의 질량 (kg):</label>
+            <input type="number" id="answer" placeholder="답을 입력하세요" min="0.1" step="0.1">
+            <button onclick="checkAnswer()">✅ 정답 확인</button>
+        </div>
+
+        <div id="result"></div>
+        <div id="explanation"></div>
+    </div>
+
+    <script>
+        let currentProblem = null;
+        let animationId = null;
+        let angle = 0;
+        let fireworks = [];
+        let showFireworks = false;
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function newProblem() {
+            // 물체 B의 질량과 속력을 무작위로 설정
+            const massB = Math.floor(Math.random() * 5) + 1; // 1~5 kg
+            const velocityB = Math.floor(Math.random() * 4) + 1; // 1~4 m/s
+            const radius = 0.5; // 0.5m 고정
+            const g = 10; // 중력가속도 10 m/s²
+
+            // 구심력 = 중력이므로: mB * v² / r = mA * g
+            // mA = (mB * v²) / (r * g)
+            const massA = (massB * velocityB * velocityB) / (radius * g);
+
+            currentProblem = {
+                massB: massB,
+                velocityB: velocityB,
+                radius: radius,
+                massA: massA
+            };
+
+            document.getElementById('problemInfo').innerHTML = `
+                <strong>📋 문제 조건</strong><br>
+                • 물체 B의 질량: ${massB} kg<br>
+                • 물체 B의 속력: ${velocityB} m/s<br>
+                • 반지름: ${radius} m<br>
+                • 중력가속도: 10 m/s²<br><br>
+                <strong>❓ 물체 A의 질량을 구하세요!</strong>
+                <div class="mascot">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <!-- 클로버 -->
+                        <g transform="translate(35, 15)">
+                            <circle cx="0" cy="-3" r="3" fill="#4CAF50"/>
+                            <circle cx="3" cy="0" r="3" fill="#4CAF50"/>
+                            <circle cx="0" cy="3" r="3" fill="#4CAF50"/>
+                            <circle cx="-3" cy="0" r="3" fill="#4CAF50"/>
+                            <rect x="-0.5" y="3" width="1" height="4" fill="#2E7D32"/>
+                        </g>
+                        <!-- 캐릭터 얼굴 -->
+                        <circle cx="20" cy="30" r="12" fill="#E0E0E0"/>
+                        <!-- 눈 -->
+                        <circle cx="17" cy="27" r="2" fill="black"/>
+                        <circle cx="23" cy="27" r="2" fill="black"/>
+                        <circle cx="17.5" cy="26.5" r="0.5" fill="white"/>
+                        <circle cx="23.5" cy="26.5" r="0.5" fill="white"/>
+                        <!-- 입 -->
+                        <path d="M 18 32 Q 20 34 22 32" stroke="#FF6B6B" stroke-width="1.5" fill="none"/>
+                        <!-- 몸 -->
+                        <ellipse cx="20" cy="42" rx="8" ry="6" fill="#F5F5F5"/>
+                        <!-- 팔 -->
+                        <circle cx="15" cy="40" r="3" fill="#4CAF50"/>
+                        <circle cx="25" cy="40" r="3" fill="#4CAF50"/>
+                    </svg>
+                </div>
+            `;
+
+            document.getElementById('answer').value = '';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('explanation').innerHTML = '';
+
+            // 폭죽 효과 리셋
+            showFireworks = false;
+            fireworks = [];
+
+            startAnimation();
+        }
+
+        function checkAnswer() {
+            if (!currentProblem) {
+                alert('먼저 새 문제를 생성해주세요!');
+                return;
+            }
+
+            const userAnswer = parseFloat(document.getElementById('answer').value);
+            const correctAnswer = currentProblem.massA;
+
+            const resultDiv = document.getElementById('result');
+            const explanationDiv = document.getElementById('explanation');
+
+            if (Math.abs(userAnswer - correctAnswer) < 0.01) {
+                resultDiv.innerHTML = `
+                    <strong>🎉 정답입니다!</strong><br>
+                    물체 A의 질량: ${correctAnswer.toFixed(2)} kg
+                `;
+                resultDiv.className = 'result';
+                
+                // 폭죽 효과 시작
+                startFireworks();
+            } else {
+                resultDiv.innerHTML = `
+                    <strong>❌ 오답입니다.</strong><br>
+                    정답: ${correctAnswer.toFixed(2)} kg<br>
+                    입력한 답: ${userAnswer} kg
+                `;
+                resultDiv.className = 'result wrong';
+            }
+
+            // 해설 표시
+            const centripetal_force = (currentProblem.massB * currentProblem.velocityB * currentProblem.velocityB) / currentProblem.radius;
+            
+            explanationDiv.innerHTML = `
+                <strong>📚 해설</strong><br><br>
+                
+                <strong>1. 구심력 공식:</strong><br>
+                구심력 F = mv²/r (m: 질량, v: 속력, r: 반지름)<br><br>
+                
+                <strong>2. 물체 B에 작용하는 구심력 계산:</strong><br>
+                <div class="formula">F = ${currentProblem.massB} × ${currentProblem.velocityB}² ÷ ${currentProblem.radius}</div>
+                <div class="formula">F = ${currentProblem.massB} × ${currentProblem.velocityB * currentProblem.velocityB} ÷ ${currentProblem.radius} = ${centripetal_force.toFixed(1)} N</div><br>
+                
+                <strong>3. 힘의 평형 조건:</strong><br>
+                물체 B의 구심력 = 물체 A의 중력<br>
+                <div class="formula">F구심력 = F중력</div>
+                <div class="formula">${centripetal_force.toFixed(1)} N = mₐ × g</div>
+                <div class="formula">${centripetal_force.toFixed(1)} N = mₐ × 10 m/s²</div><br>
+                
+                <strong>4. 물체 A의 질량 계산:</strong><br>
+                <div class="formula">mₐ = ${centripetal_force.toFixed(1)} ÷ 10 = ${currentProblem.massA.toFixed(2)} kg</div>
+            `;
+            explanationDiv.className = 'explanation';
+        }
+
+        function startAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 책상 그리기 (사다리꼴 형태, 파스텔톤)
+            drawTable();
+            
+            // 타원 궤도 그리기
+            drawOrbit();
+            
+            // 실 그리기
+            drawString();
+            
+            // 물체 A 그리기 (정육면체)
+            drawObjectA();
+            
+            // 물체 B 그리기 (원형, 원근법 적용)
+            drawObjectB();
+            
+            // 폭죽 그리기
+            if (showFireworks) {
+                drawFireworks();
+                updateFireworks();
+            }
+            
+            angle += 0.02 * (currentProblem ? currentProblem.velocityB : 1);
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function drawTable() {
+            // 책상 면 (사다리꼴 - 위쪽이 아래쪽보다 짧음)
+            ctx.fillStyle = '#E8D5FF'; // 파스텔 보라
+            ctx.beginPath();
+            ctx.moveTo(80, 120);   // 왼쪽 위
+            ctx.lineTo(270, 120);  // 오른쪽 위
+            ctx.lineTo(300, 180);  // 오른쪽 아래
+            ctx.lineTo(50, 180);   // 왼쪽 아래
+            ctx.closePath();
+            ctx.fill();
+            
+            // 마이멜로디 캐릭터 그리기 (왼쪽 구석에 배치)
+            drawMyMelody();
+            
+            // 책상 테두리
+            ctx.strokeStyle = '#D1C4E9';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 책상 다리 (앞쪽 두 개만)
+            ctx.fillStyle = '#F8BBD9'; // 파스텔 핑크
+            // 왼쪽 다리
+            ctx.fillRect(50, 180, 8, 60);
+            // 오른쪽 다리
+            ctx.fillRect(292, 180, 8, 60);
+        }
+
+        function drawMyMelody() {
+            // 캐릭터를 궤도에서 멀리 떨어뜨리기 위해 왼쪽 끝에 배치
+            const centerX = 85;
+            const centerY = 155;
+            
+            // 몸 (타원형)
+            ctx.fillStyle = '#FFE4E1';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 5, 12, 10, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 머리 (원형)
+            ctx.fillStyle = '#FFE4E1';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 8, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 귀 (핑크 안쪽)
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 6, centerY - 15, 3, 6, -0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX + 6, centerY - 15, 3, 6, 0.3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 후드 (핑크)
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 8, 10, Math.PI, 0, false);
+            ctx.fill();
+            
+            // 눈
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(centerX - 3, centerY - 10, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 3, centerY - 10, 1, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 코 (작은 노란 삼각형)
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 6);
+            ctx.lineTo(centerX - 1, centerY - 4);
+            ctx.lineTo(centerX + 1, centerY - 4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 입 (작은 곡선)
+            ctx.strokeStyle = '#FFB6C1';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 3, 2, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+        }
+
+        function drawOrbit() {
+            const centerX = 175;
+            const centerY = 150;
+            const radiusX = 70;
+            const radiusY = 25;
+
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 중심에서 반지름 방향으로 선 그리기
+            const objX = centerX + radiusX * Math.cos(angle);
+            const objY = centerY + radiusY * Math.sin(angle);
+            
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(objX, objY);
+            ctx.stroke();
+        }
+
+        function drawString() {
+            const centerX = 175;
+            const centerY = 150;
+            const tableTop = 180;  // 책상 윗면 Y 좌표
+            const stringEndY = 250;
+
+            // 1. 궤도 중심에서 책상 윗면까지 (가려지는 부분 - 점선)
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX, tableTop);
+            ctx.stroke();
+
+            // 2. 책상 아래에서 물체 A까지 (보이는 부분 - 실선)
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, tableTop);
+            ctx.lineTo(centerX, stringEndY);
+            ctx.stroke();
+
+            // 실의 연결점 표시 (궤도 중심에서)
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 2, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 실의 연결점 표시 (물체 A에서)
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(centerX, stringEndY - 20, 2, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function drawObjectA() {
+            const centerX = 175;
+            const objectY = 250;
+
+            // 정육면체 그리기
+            ctx.fillStyle = '#FFB74D';
+            ctx.strokeStyle = '#FF9800';
+            ctx.lineWidth = 2;
+            
+            // 앞면
+            ctx.fillRect(centerX - 15, objectY - 15, 30, 30);
+            ctx.strokeRect(centerX - 15, objectY - 15, 30, 30);
+            
+            // 윗면 (약간 기울어진 사각형)
+            ctx.fillStyle = '#FFCC02';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 15, objectY - 15);
+            ctx.lineTo(centerX - 10, objectY - 20);
+            ctx.lineTo(centerX + 20, objectY - 20);
+            ctx.lineTo(centerX + 15, objectY - 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // 옆면
+            ctx.fillStyle = '#FFD54F';
+            ctx.beginPath();
+            ctx.moveTo(centerX + 15, objectY - 15);
+            ctx.lineTo(centerX + 20, objectY - 20);
+            ctx.lineTo(centerX + 20, objectY + 10);
+            ctx.lineTo(centerX + 15, objectY + 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 라벨 (글씨 크기 조정)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(centerX + 25, objectY - 10, 55, 20);
+            ctx.strokeStyle = '#333';
+            ctx.strokeRect(centerX + 25, objectY - 10, 55, 20);
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('물체 A', centerX + 52, objectY - 2);
+            ctx.fillText('? kg', centerX + 52, objectY + 8);
+        }
+
+        function drawObjectB() {
+            if (!currentProblem) return;
+
+            const centerX = 175;
+            const centerY = 150;
+            const radiusX = 70;
+            const radiusY = 25;
+
+            const objX = centerX + radiusX * Math.cos(angle);
+            const objY = centerY + radiusY * Math.sin(angle);
+
+            // 원근법 적용 - sin값에 따라 크기 변화
+            const depth = Math.sin(angle);
+            const scale = 0.7 + 0.3 * (depth + 1) / 2; // 0.7 ~ 1.0
+            const radius = 15 * scale;
+
+            // 물체 B (원형)
+            ctx.fillStyle = depth > 0 ? '#4CAF50' : '#388E3C'; // 앞쪽은 밝게, 뒤쪽은 어둡게
+            ctx.beginPath();
+            ctx.arc(objX, objY, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = '#2E7D32';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 라벨
+            const labelX = objX + 25;
+            const labelY = objY - 25;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(labelX, labelY, 80, 35);
+            ctx.strokeStyle = '#333';
+            ctx.strokeRect(labelX, labelY, 80, 35);
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('물체 B', labelX + 5, labelY + 12);
+            ctx.fillText(`${currentProblem.massB}kg`, labelX + 5, labelY + 23);
+            ctx.fillText(`${currentProblem.velocityB}m/s`, labelX + 5, labelY + 32);
+        }
+
+        // 폭죽 관련 함수들
+        function startFireworks() {
+            showFireworks = true;
+            fireworks = [];
+            
+            // 여러 개의 폭죽 생성
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createFirework();
+                }, i * 200);
+            }
+            
+            // 4초 후 폭죽 효과 종료
+            setTimeout(() => {
+                showFireworks = false;
+                fireworks = [];
+            }, 4000);
+        }
+
+        function createFirework() {
+            const centerX = 50 + Math.random() * (canvas.width - 100);
+            const centerY = 50 + Math.random() * (canvas.height * 0.5);
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF', '#FD79A8', '#FDCB6E', '#6C5CE7'];
+            
+            const firework = {
+                x: centerX,
+                y: centerY,
+                particles: []
+            };
+            
+            // 입자들 생성 (더 많은 입자로 화려하게)
+            for (let i = 0; i < 20; i++) {
+                const angle = (Math.PI * 2 * i) / 20;
+                const velocity = Math.random() * 4 + 2;
+                
+                firework.particles.push({
+                    x: centerX,
+                    y: centerY,
+                    vx: Math.cos(angle) * velocity,
+                    vy: Math.sin(angle) * velocity,
+                    life: 1.0,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 4 + 2
+                });
+            }
+            
+            fireworks.push(firework);
+        }
+
+        function updateFireworks() {
+            fireworks.forEach((firework, fireworkIndex) => {
+                firework.particles.forEach((particle, particleIndex) => {
+                    // 위치 업데이트
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    // 중력 효과와 마찰
+                    particle.vy += 0.15;
+                    particle.vx *= 0.99;
+                    particle.vy *= 0.99;
+                    
+                    // 수명 감소
+                    particle.life -= 0.015;
+                    
+                    // 수명이 다한 입자 제거
+                    if (particle.life <= 0) {
+                        firework.particles.splice(particleIndex, 1);
+                    }
+                });
+                
+                // 입자가 모두 사라진 폭죽 제거
+                if (firework.particles.length === 0) {
+                    fireworks.splice(fireworkIndex, 1);
+                }
+            });
+        }
+
+        function drawFireworks() {
+            fireworks.forEach(firework => {
+                firework.particles.forEach(particle => {
+                    ctx.save();
+                    ctx.globalAlpha = particle.life;
+                    ctx.fillStyle = particle.color;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = particle.color;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // 꼬리 효과 추가
+                    ctx.globalAlpha = particle.life * 0.3;
+                    ctx.beginPath();
+                    ctx.arc(particle.x - particle.vx, particle.y - particle.vy, particle.size * 0.5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                });
+            });
+        }
+
+        // 초기 애니메이션 시작
+        animate();
+    </script>
+</body>

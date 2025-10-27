@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물리학2 시뮬레이션 갤러리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f2e780 0%, #edae5c 100%);
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .gallery-container {
+            max-width: 400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 0 10px;
+        }
+
+        .sim-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sim-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .sim-card:active {
+            transform: translateY(-2px);
+        }
+
+        .card-image {
+            flex: 1;
+            background: linear-gradient(45deg, #f0f2f5, #e1e5ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                rgba(102, 126, 234, 0.1) 0%, 
+                rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+        }
+
+        .card-title {
+            padding: 8px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+        }
+
+        .info-card .card-image {
+            background: transparent;
+            font-size: 28px;
+        }
+
+        .info-card .card-title {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 380px) {
+            .gallery-container {
+                gap: 10px;
+                padding: 0 5px;
+            }
+            
+            .card-title {
+                font-size: 10px;
+                padding: 6px;
+            }
+        }
+
+        @media (min-width: 480px) {
+            .gallery-container {
+                max-width: 450px;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔬 수행평가2 시뮬레이션 갤러리</h1>
+        <p>학생들이 만든 Interactive Physics Simulations</p>
+    </div>
+
+    <div class="gallery-container">
+        <!-- 안내 페이지 -->
+        <div class="sim-card info-card" onclick="openSimulation('info')">
+            <div class="card-image">ℹ️</div>
+            <div class="card-title">사용 안내</div>
+        </div>
+
+        <!-- 물리 시뮬레이션들 -->
+        <div class="sim-card" onclick="openSimulation('sim06')">
+            <div class="card-image">
+                <img src="thumbnails/sim06.png" alt="3506 나영서">
+            </div>
+            <div class="card-title">3506 나영서</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim06')">
+            <div class="card-image">
+                <img src="thumbnails/sim06.png" alt="3506 나영서">
+            </div>
+            <div class="card-title">3506 나영서</div>
+        </div>
+
+         <div class="sim-card" onclick="openSimulation('sim06')">
+            <div class="card-image">
+                <img src="thumbnails/sim06.png" alt="3506 나영서">
+            </div>
+            <div class="card-title">3506 나영서</div>
+        </div>
+
+
+
+         <div class="sim-card" onclick="openSimulation('sim06')">
+            <div class="card-image">
+                <img src="thumbnails/sim06.png" alt="3506 나영서">
+            </div>
+            <div class="card-title">3506 나영서</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/ba3e037f-133b-4bee-948a-97191960917c?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim05.png" alt="3505 김현주">
+            </div>
+            <div class="card-title">3505 김현주</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim06')">
+            <div class="card-image">
+                <img src="thumbnails/sim06.png" alt="3506 나영서">
+            </div>
+            <div class="card-title">3506 나영서</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/a747fb4c-cd1b-4a57-a011-ea666e968708?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim07.png" alt="3507 박주니">
+            </div>
+            <div class="card-title">3507 박주니</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim08')">
+            <div class="card-image">
+                <img src="thumbnails/sim08.png" alt="3508 백세빈">
+            </div>
+            <div class="card-title">3508 백세빈</div>
+        </div>
+
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/37bfc277-5c6a-4ca7-aef1-131e80a3c166?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim09.png" alt="3509 서채연">
+            </div>
+            <div class="card-title">3509 서채연</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/261923b4-0d20-4fc5-bf97-f7e2efa4ef59?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim10.png" alt="3510 신태린">
+            </div>
+            <div class="card-title">3510 신태린</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim11')">
+            <div class="card-image">
+                <img src="thumbnails/sim11.png" alt="3511 심가영">
+            </div>
+            <div class="card-title">3511 심가영</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/ab1a1817-525e-48ae-a811-13b07367e51a')">
+            <div class="card-image">
+                <img src="thumbnails/sim12.png" alt="3512 양서영">
+            </div>
+            <div class="card-title">3512 양서영</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/c079cec5-efe3-42fd-b77a-e6875dd556b3?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim13.png" alt="3513 양은채">
+            </div>
+            <div class="card-title">3513 양은채</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim14')">
+            <div class="card-image">
+                <img src="thumbnails/sim14.png" alt="3514 유수빈">
+            </div>
+            <div class="card-title">3514 유수빈</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/201b231b-80d7-4f48-ba7c-8dd4479b1432?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim15.png" alt="3515 유하은">
+            </div>
+            <div class="card-title">3515 유하은</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/b2876bea-62f8-497f-b5ed-d8b889c873ea')">
+            <div class="card-image">
+                <img src="thumbnails/sim16.png" alt="3516 이규리">
+            </div>
+            <div class="card-title">3516 이규리</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim17')">
+            <div class="card-image">
+                <img src="thumbnails/sim17.png" alt="3517 이다정">
+            </div>
+            <div class="card-title">3517 이다정</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/59740033-a2da-4929-823a-a5be2c2357e9?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim18.png" alt="3518 이미림">
+            </div>
+            <div class="card-title">3518 이미림</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim19')">
+            <div class="card-image">
+                <img src="thumbnails/sim19.png" alt="3519 이민정">
+            </div>
+            <div class="card-title">3519 이민정</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/4e22b9fb-4be4-4c65-af7e-32756248776c')">
+            <div class="card-image">
+                <img src="thumbnails/sim20.png" alt="3520 이소연">
+            </div>
+            <div class="card-title">3520 이소연</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/1b520ff8-5229-4ef3-907e-c6e860fe3a69?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim21.png" alt="3521 이은지">
+            </div>
+            <div class="card-title">3521 이은지</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/4c9a77f2-52e1-4aaf-b81e-c7d167229c25')">
+            <div class="card-image">
+                <img src="thumbnails/sim22.png" alt="3522 임선홍">
+            </div>
+            <div class="card-title">3522 임선홍</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/d202fb1c-74de-47c5-a2a3-e5fb132d8fdd?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim23.png" alt="3523 임소정">
+            </div>
+            <div class="card-title">3523 임소정</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/e268a5ec-5500-4b0e-afb6-4379fa6da6aa')">
+            <div class="card-image">
+                <img src="thumbnails/sim24.png" alt="3524 임시연">
+            </div>
+            <div class="card-title">3524 임시연</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/f6df7711-1668-45f5-8761-e7c5f0451d3c?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim25.png" alt="3525 전경림">
+            </div>
+            <div class="card-title">3525 전경림</div>
+        </div>
+
+         <div class="sim-card" onclick="openExternalLink('https://claude.ai/public/artifacts/a015ac50-00b0-4dbe-a569-3a260ce20ba4?authuser=0')">
+            <div class="card-image">
+                <img src="thumbnails/sim26.png" alt="3526 최민희">
+            </div>
+            <div class="card-title">3526 최민희</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim27')">
+            <div class="card-image">
+                <img src="thumbnails/sim27.png" alt="3527 최성연">
+            </div>
+            <div class="card-title">3527 최성연</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim28')">
+            <div class="card-image">
+                <img src="thumbnails/sim28.png" alt="3528 최지수">
+            </div>
+            <div class="card-title">3528 최지수</div>
+        </div>
+
+        <div class="sim-card" onclick="openSimulation('sim29')">
+            <div class="card-image">
+                <img src="thumbnails/sim29.png" alt="3529 최지원">
+            </div>
+            <div class="card-title">3529 최지원</div>
+        </div>
+
+
+    </div>
+
+    <script>
+        function openExternalLink(url) {
+            window.open(url, '_blank');
+        }
+
+        function openSimulation(simId) {
+            if (simId === 'info') {
+                window.location.href = './info/index.html';
+            } else {
+                window.location.href = `./simulations/${simId}/index.html`;
+            }
+        }
+
+        // 터치 피드백 개선
+        document.querySelectorAll('.sim-card').forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'translateY(-2px) scale(0.98)';
+            });
+            
+            card.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>

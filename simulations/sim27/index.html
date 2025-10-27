@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물리2 운동량 보존 문제 시뮬레이터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .problem-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4285f4;
+        }
+        
+        .train-diagram {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .train-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        
+        .train {
+            display: inline-block;
+            width: 280px;
+            height: 70px;
+            background: #95a5a6;
+            border-radius: 8px;
+            position: relative;
+            border: 3px solid #7f8c8d;
+        }
+        
+        .train::before {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 30px;
+            width: 12px;
+            height: 12px;
+            background: #2c3e50;
+            border-radius: 50%;
+        }
+        
+        .train::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            right: 30px;
+            width: 12px;
+            height: 12px;
+            background: #2c3e50;
+            border-radius: 50%;
+        }
+        
+        .mass-object {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 30px;
+            height: 30px;
+            background: #e74c3c;
+            border-radius: 4px;
+            border: 2px solid #c0392b;
+            z-index: 3;
+        }
+        
+        .mass-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .spring-left {
+            position: absolute;
+            top: 32px;
+            left: 55px;
+            width: 75px;
+            height: 6px;
+            background: repeating-linear-gradient(
+                to right,
+                #3498db 0px,
+                #3498db 4px,
+                transparent 4px,
+                transparent 8px
+            );
+            border-top: 1px solid #2980b9;
+            border-bottom: 1px solid #2980b9;
+            z-index: 1;
+        }
+        
+        .spring-left::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -3px;
+            width: 2px;
+            height: 12px;
+            background: #2980b9;
+        }
+        
+        .spring-left::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -3px;
+            width: 2px;
+            height: 12px;
+            background: #2980b9;
+        }
+        
+        .scale {
+            position: absolute;
+            top: 20px;
+            left: 130px;
+            width: 60px;
+            height: 30px;
+            z-index: 2;
+        }
+        
+        .scale-body {
+            position: absolute;
+            top: 8px;
+            left: 15px;
+            width: 30px;
+            height: 14px;
+            background: #f8f9fa;
+            border: 2px solid #2c3e50;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .scale-face {
+            width: 26px;
+            height: 10px;
+            background: white;
+            border-radius: 2px;
+            position: relative;
+            border: 1px solid #bdc3c7;
+        }
+        
+        .scale-face::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 2px;
+            width: 1px;
+            height: 4px;
+            background: #2c3e50;
+            box-shadow: 4px 0 0 #2c3e50, 8px 0 0 #2c3e50, 12px 0 0 #2c3e50, 16px 0 0 #2c3e50, 20px 0 0 #2c3e50;
+        }
+        
+        .scale-face::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 2px;
+            width: 1px;
+            height: 4px;
+            background: #2c3e50;
+            box-shadow: 4px 0 0 #2c3e50, 8px 0 0 #2c3e50, 12px 0 0 #2c3e50, 16px 0 0 #2c3e50, 20px 0 0 #2c3e50;
+        }
+        
+        .scale-needle {
+            position: absolute;
+            top: 1px;
+            left: 18px;
+            width: 1px;
+            height: 6px;
+            background: #e74c3c;
+            border-radius: 0.5px;
+        }
+        
+        .scale-left {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 3px;
+            background: #34495e;
+            border-radius: 1px;
+        }
+        
+        .scale-right {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 3px;
+            background: #34495e;
+            border-radius: 1px;
+        }
+        
+        .spring-right {
+            position: absolute;
+            top: 32px;
+            left: 190px;
+            width: 75px;
+            height: 6px;
+            background: repeating-linear-gradient(
+                to right,
+                #3498db 0px,
+                #3498db 4px,
+                transparent 4px,
+                transparent 8px
+            );
+            border-top: 1px solid #2980b9;
+            border-bottom: 1px solid #2980b9;
+            z-index: 1;
+        }
+        
+        .spring-right::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -3px;
+            width: 2px;
+            height: 12px;
+            background: #2980b9;
+        }
+        
+        .spring-right::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -3px;
+            width: 2px;
+            height: 12px;
+            background: #2980b9;
+        }
+        
+        .train-wall {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 4px;
+            height: 54px;
+            background: #34495e;
+            border-radius: 2px;
+        }
+        
+        .train-floor {
+            position: absolute;
+            bottom: 8px;
+            left: 5px;
+            right: 5px;
+            height: 2px;
+            background: #34495e;
+        }
+        
+        .arrow {
+            display: inline-block;
+            margin: 0 15px;
+            font-size: 2em;
+            color: #e74c3c;
+        }
+        
+        .question {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .question h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-row input, .input-row select {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .input-row input:focus, .input-row select:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+        
+        .check-btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+        }
+        
+        .perspective-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .perspective-item {
+            text-align: center;
+        }
+        
+        .perspective-item label {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        
+        .perspective-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .perspective-row select {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .result {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+            position: relative;
+        }
+        
+        .result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .result.correct {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .result.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .result-emoji {
+            font-size: 2em;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .solution {
+            background: #e7f3ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid #0066cc;
+            display: none;
+        }
+        
+        .solution.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .formula {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .check-btn-wide {
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin: 5px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.2em;
+            }
+            
+            .perspective-group {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .train {
+                width: 250px;
+            }
+            
+            .scale {
+                left: 125px;
+            }
+            
+            .spring-left {
+                width: 65px;
+            }
+            
+            .spring-right {
+                left: 175px;
+                width: 60px;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .perspective-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .check-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚂 운동량 보존 문제</h1>
+            <p>물리2 - 충돌과 운동량 보존</p>
+        </div>
+        
+        <div class="content">
+            <div class="problem-section">
+                <p><strong>문제 상황:</strong> 그림에서와 같이 기차 화물칸의 마찰이 없는 수평한 마루 위에 질량 m = <span id="mass">5.0</span>kg인 물체가 용수철저울에 연결되어 있고, 기차가 정지해 있을 때 용수철저울의 눈금은 영이었다.</p>
+                
+                <div class="train-diagram">
+                    <div class="train-container">
+                        <div class="train">
+                            <div class="train-floor"></div>
+                            <div class="train-wall"></div>
+                            <div class="mass-object">
+                                <div class="mass-label">m</div>
+                            </div>
+                            <div class="spring-left"></div>
+                            <div class="scale">
+                                <div class="scale-left"></div>
+                                <div class="scale-body">
+                                    <div class="scale-face">
+                                        <div class="scale-needle"></div>
+                                    </div>
+                                </div>
+                                <div class="scale-right"></div>
+                            </div>
+                            <div class="spring-right"></div>
+                        </div>
+                    </div>
+                    <span class="arrow">→</span>
+                    <div style="font-size: 0.9em; margin-top: 15px;">
+                        질량: <span id="mass-display">5.0</span>kg<br>
+                        <span style="font-size: 0.8em; color: #666;">물체(m) ↔ 용수철 ↔ 저울 ↔ 용수철 ↔ 벽면</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <h3>(1) 기차의 가속도 구하기</h3>
+                <p>기차가 움직이는 동안 용수철저울의 눈금이 <span id="force-reading">20</span>N을 가리킨다면, 이 때 기차의 가속도는 얼마인가?</p>
+                
+                <div class="input-group">
+                    <label for="acceleration">가속도 (m/s²):</label>
+                    <div class="input-row">
+                        <input type="number" id="acceleration" step="0.1" placeholder="답을 입력하세요">
+                        <button class="check-btn" onclick="checkAnswer(1)">확인</button>
+                    </div>
+                </div>
+                <div id="result1" class="result"></div>
+                <div id="solution1" class="solution"></div>
+            </div>
+            
+            <div class="question">
+                <h3>(2) 등속운동시 용수철저울 눈금</h3>
+                <p>만약 기차가 등속도로 움직인다면, 용수철저울은 어떤 값을 나타내는가?</p>
+                
+                <div class="input-group">
+                    <label for="uniform-motion">용수철저울 눈금 (N):</label>
+                    <div class="input-row">
+                        <input type="number" id="uniform-motion" step="0.1" placeholder="답을 입력하세요">
+                        <button class="check-btn" onclick="checkAnswer(2)">확인</button>
+                    </div>
+                </div>
+                <div id="result2" class="result"></div>
+                <div id="solution2" class="solution"></div>
+            </div>
+            
+            <div class="question">
+                <h3>(3) 물체에 작용한 힘의 관점별 설명</h3>
+                <p>이 물체에 작용한 힘을 기차 안과 기차 밖에 서 있는 사람의 입장에서 각각 설명하시오.</p>
+                
+                <div class="input-group">
+                    <label>🚂 기차 안 사람의 관점:</label>
+                    <select id="inside-train">
+                        <option value="">선택하세요</option>
+                        <option value="inertial">관성력이 작용한다</option>
+                        <option value="spring">용수철력만 작용한다</option>
+                        <option value="none">힘이 작용하지 않는다</option>
+                        <option value="gravity">중력만 작용한다</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>🚶 기차 밖 사람의 관점:</label>
+                    <select id="outside-train">
+                        <option value="">선택하세요</option>
+                        <option value="inertial">관성력이 작용한다</option>
+                        <option value="spring">용수철력만 작용한다</option>
+                        <option value="none">힘이 작용하지 않는다</option>
+                        <option value="gravity">중력만 작용한다</option>
+                    </select>
+                </div>
+                
+                <button class="check-btn check-btn-wide" onclick="checkAnswer(3)">확인</button>
+                <div id="result3" class="result"></div>
+                <div id="solution3" class="solution"></div>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="generateNewProblem()">새 문제</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMass = 5.0;
+        let currentForce = 20;
+        let correctAcceleration = 0;
+        let correctUniformMotion = 0;
+        let correctInsideTrain = "inertial";
+        let correctOutsideTrain = "spring";
+        
+        function generateNewProblem() {
+            currentMass = 5.0;
+            
+            const forceOptions = [10, 15, 20, 25, 30];
+            currentForce = forceOptions[Math.floor(Math.random() * forceOptions.length)];
+            
+            correctAcceleration = currentForce / currentMass;
+            correctUniformMotion = 0;
+            correctInsideTrain = "inertial";
+            correctOutsideTrain = "spring";
+            
+            document.getElementById('mass').textContent = currentMass.toFixed(1);
+            document.getElementById('mass-display').textContent = currentMass.toFixed(1);
+            document.getElementById('force-reading').textContent = currentForce;
+            
+            document.getElementById('acceleration').value = '';
+            document.getElementById('uniform-motion').value = '';
+            document.getElementById('inside-train').value = '';
+            document.getElementById('outside-train').value = '';
+            
+            // 모든 결과 숨기기
+            for (let i = 1; i <= 3; i++) {
+                const result = document.getElementById(`result${i}`);
+                const solution = document.getElementById(`solution${i}`);
+                result.classList.remove('show');
+                solution.classList.remove('show');
+            }
+            
+            const problemSection = document.querySelector('.problem-section');
+            problemSection.style.transform = 'scale(0.95)';
+            problemSection.style.transition = 'transform 0.2s';
+            setTimeout(() => {
+                problemSection.style.transform = 'scale(1)';
+            }, 200);
+        }
+        
+        function checkAnswer(questionNum) {
+            const result = document.getElementById(`result${questionNum}`);
+            const solution = document.getElementById(`solution${questionNum}`);
+            
+            let isCorrect = false;
+            let resultText = '';
+            let solutionText = '';
+            
+            if (questionNum === 1) {
+                const userAcceleration = parseFloat(document.getElementById('acceleration').value);
+                isCorrect = Math.abs(userAcceleration - correctAcceleration) < 0.1;
+                
+                if (isCorrect) {
+                    resultText = '<span class="result-emoji">🥤</span>정답입니다!';
+                } else {
+                    resultText = '<span class="result-emoji">🍠</span>틀렸습니다. 다시 생각해보세요!';
+                }
+                
+                solutionText = `
+                    <h4>📚 해설</h4>
+                    <p><strong>기차의 가속도 구하기:</strong></p>
+                    <div class="formula">F = ma</div>
+                    <p>용수철저울이 ${currentForce}N을 가리키므로, 물체에 작용하는 관성력이 ${currentForce}N입니다.</p>
+                    <p>a = F/m = ${currentForce}N ÷ ${currentMass.toFixed(1)}kg = <strong>${correctAcceleration.toFixed(1)} m/s²</strong></p>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                        <strong>💡 핵심:</strong> 용수철저울의 눈금 = 물체에 작용하는 관성력의 크기
+                    </div>
+                `;
+            } else if (questionNum === 2) {
+                const userUniformMotion = parseFloat(document.getElementById('uniform-motion').value);
+                isCorrect = Math.abs(userUniformMotion - correctUniformMotion) < 0.1;
+                
+                if (isCorrect) {
+                    resultText = '<span class="result-emoji">🥤</span>정답입니다!';
+                } else {
+                    resultText = '<span class="result-emoji">🍠</span>틀렸습니다. 다시 생각해보세요!';
+                }
+                
+                solutionText = `
+                    <h4>📚 해설</h4>
+                    <p><strong>등속운동 시 용수철저울 눈금:</strong></p>
+                    <p>기차가 등속도로 움직일 때는 가속도가 0이므로, 관성력이 작용하지 않습니다.</p>
+                    <p>따라서 용수철저울은 <strong>${correctUniformMotion} N</strong>을 가리킵니다.</p>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                        <strong>💡 핵심:</strong> 등속운동 시에는 가속도 = 0, 따라서 관성력 = 0
+                    </div>
+                `;
+            } else if (questionNum === 3) {
+                const userInsideTrain = document.getElementById('inside-train').value;
+                const userOutsideTrain = document.getElementById('outside-train').value;
+                isCorrect = (userInsideTrain === correctInsideTrain && userOutsideTrain === correctOutsideTrain);
+                
+                if (isCorrect) {
+                    resultText = '<span class="result-emoji">🥤</span>정답입니다!';
+                } else {
+                    resultText = '<span class="result-emoji">🍠</span>틀렸습니다. 다시 생각해보세요!';
+                }
+                
+                solutionText = `
+                    <h4>📚 해설</h4>
+                    <p><strong>힘의 관점별 설명:</strong></p>
+                    
+                    <p><strong>🚂 기차 안 사람의 관점:</strong> 관성력이 작용한다</p>
+                    <p>→ 기차와 함께 가속하는 비관성 기준계에서는 물체에 관성력이 작용하는 것으로 설명</p>
+                    
+                    <p><strong>🚶 기차 밖 사람의 관점:</strong> 용수철력만 작용한다</p>
+                    <p>→ 정지한 관성 기준계에서는 용수철이 물체를 밀어 기차와 함께 가속시키는 것으로 설명</p>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                        <strong>💡 핵심 개념:</strong><br>
+                        • 관성 기준계: 실제 힘(용수철력)만 고려<br>
+                        • 비관성 기준계: 관성력을 추가로 고려<br>
+                        • 같은 현상도 기준계에 따라 다르게 해석됨
+                    </div>
+                `;
+            }
+            
+            if (isCorrect) {
+                result.className = 'result correct show';
+            } else {
+                result.className = 'result incorrect show';
+            }
+            
+            result.innerHTML = resultText;
+            solution.innerHTML = solutionText;
+            solution.classList.add('show');
+        }
+        
+        // 엔터 키 이벤트
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.id === 'acceleration') {
+                    checkAnswer(1);
+                } else if (activeElement.id === 'uniform-motion') {
+                    checkAnswer(2);
+                }
+            }
+        });
+        
+        // 초기 문제 생성
+        generateNewProblem();
+    </script>
+</body>
+</html>

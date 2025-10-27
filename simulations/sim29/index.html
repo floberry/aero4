@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기차 용수철저울 물리 문제</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+    }
+    
+    .container {
+        max-width: 400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 25px 20px;
+        text-align: center;
+    }
+    
+    .header h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .header p {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    
+    .train-diagram {
+        padding: 30px 20px;
+        text-align: center;
+        background: #f8f9ff;
+    }
+    
+    .train {
+        width: 100%;
+        max-width: 280px;
+        height: 120px;
+        background: #e8e8e8;
+        border: 3px solid #666;
+        border-radius: 8px;
+        margin: 0 auto 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .train::before {
+        content: '→';
+        position: absolute;
+        top: -40px;
+        right: 20px;
+        font-size: 30px;
+        color: #666;
+    }
+    
+    .connection-system {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding-left: 30px;
+        gap: 0;
+        width: 100%;
+    }
+    
+    .mass {
+        width: 40px;
+        height: 40px;
+        background: #666;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        position: relative;
+        z-index: 3;
+    }
+    
+    .spring-scale {
+        width: 60px;
+        height: 20px;
+        background: white;
+        border: 2px solid #666;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        position: relative;
+        z-index: 3;
+    }
+    
+    .line1 {
+        width: 30px;
+        height: 2px;
+        background: #333;
+        z-index: 2;
+    }
+    
+    .line2 {
+        width: calc(100% - 170px);
+        height: 2px;
+        background: #333;
+        z-index: 2;
+    }
+    
+    .problem-section {
+        padding: 25px 20px;
+    }
+    
+    .problem-text {
+        background: #f0f4ff;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border-left: 4px solid #4facfe;
+        line-height: 1.6;
+        font-size: 15px;
+    }
+    
+    .input-section {
+        margin-bottom: 20px;
+    }
+    
+    .input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+    }
+    
+    .input-group label {
+        flex: 1;
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .input-group input {
+        width: 80px;
+        padding: 8px 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        text-align: center;
+        transition: border-color 0.3s;
+    }
+    
+    .input-group input:focus {
+        outline: none;
+        border-color: #4facfe;
+    }
+    
+    .answer-section {
+        margin-bottom: 20px;
+    }
+    
+    .answer-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        font-size: 16px;
+        text-align: center;
+        transition: border-color 0.3s;
+    }
+    
+    .answer-input:focus {
+        outline: none;
+        border-color: #4facfe;
+    }
+    
+    .buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .btn {
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #f8f9fa;
+        color: #666;
+        border: 2px solid #ddd;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .explanation {
+        background: #e8f5e8;
+        border: 2px solid #4caf50;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+    }
+    
+    .explanation.show {
+        display: block;
+    }
+    
+    .explanation h3 {
+        color: #2e7d32;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    
+    .explanation p {
+        line-height: 1.5;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    
+    .formula {
+        background: #fff;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        margin: 10px 0;
+        text-align: center;
+        font-weight: bold;
+    }
+    
+    .result {
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-weight: 600;
+        font-size: 16px;
+        display: none;
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result.correct {
+        background: #e8f5e8;
+        color: #2e7d32;
+        border: 2px solid #4caf50;
+        display: block;
+    }
+    
+    .result.incorrect {
+        background: #ffebee;
+        color: #c62828;
+        border: 2px solid #f44336;
+        display: block;
+    }
+    
+    .result.warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 2px solid #ffc107;
+        display: block;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚂 기차 용수철저울 문제</h1>
+            <p>뉴턴 제2법칙 연습하기</p>
+        </div>
+
+```
+    <div class="train-diagram">
+        <div class="train">
+            <div class="connection-system">
+                <div class="mass">m</div>
+                <div class="line1"></div>
+                <div class="spring-scale" id="scaleDisplay">0N</div>
+                <div class="line2"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="problem-section">
+        <div class="input-section">
+            <div class="input-group">
+                <label>질량 (kg):</label>
+                <input type="number" id="massInput" value="5.0" step="0.1" min="0.1">
+            </div>
+            <div class="input-group">
+                <label>용수철저울 눈금 (N):</label>
+                <input type="number" id="forceInput" value="10.0" step="0.1">
+            </div>
+        </div>
+        
+        <div class="answer-section">
+            <label for="answerInput" style="display: block; margin-bottom: 10px; font-weight: 500;">기차의 가속도 (m/s²):</label>
+            <input type="number" id="answerInput" class="answer-input" placeholder="답을 입력하세요" step="0.01">
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="checkAnswer()">정답 확인</button>
+            <button class="btn btn-secondary" onclick="generateNewProblem()">새 문제</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="explanation" id="explanation">
+            <h3>📚 해설</h3>
+            <p><strong>원리:</strong> 기차가 가속할 때, 물체는 관성에 의해 뒤쪽으로 밀리려 하고, 용수철저울이 물체를 잡아당겨 기차와 함께 가속시킵니다.</p>
+            <div class="formula">F = ma</div>
+            <p><strong>계산:</strong></p>
+            <p id="calculationSteps"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentMass = 5.0;
+    let currentForce = 10.0;
+    let correctAnswer = 2.0;
+
+    function updateProblem() {
+        const mass = parseFloat(document.getElementById('massInput').value) || 5.0;
+        const force = parseFloat(document.getElementById('forceInput').value) || 10.0;
+        
+        currentMass = mass;
+        currentForce = force;
+        correctAnswer = force / mass;
+        
+        document.getElementById('scaleDisplay').textContent = `${force}N`;
+        document.getElementById('answerInput').value = '';
+        document.getElementById('result').style.display = 'none';
+        document.getElementById('explanation').classList.remove('show');
+    }
+
+    function checkAnswer() {
+        const userAnswer = parseFloat(document.getElementById('answerInput').value);
+        const resultDiv = document.getElementById('result');
+        const explanationDiv = document.getElementById('explanation');
+        
+        if (isNaN(userAnswer)) {
+            resultDiv.textContent = '답을 입력해주세요!';
+            resultDiv.className = 'result incorrect';
+            resultDiv.style.display = 'block';
+            return;
+        }
+        
+        const tolerance = 0.01;
+        const isCorrect = Math.abs(userAnswer - correctAnswer) < tolerance;
+        
+        if (isCorrect) {
+            resultDiv.textContent = '정답입니다!';
+            resultDiv.className = 'result correct';
+            resultDiv.style.display = 'block';
+        } else {
+            resultDiv.textContent = '오답입니다!';
+            resultDiv.className = 'result incorrect';
+            resultDiv.style.display = 'block';
+        }
+        
+        // 해설 항상 표시
+        document.getElementById('calculationSteps').innerHTML = 
+            `용수철저울의 힘: F = ${currentForce}N<br>
+            물체의 질량: m = ${currentMass}kg<br>
+            가속도: a = F/m = ${currentForce}/${currentMass} = ${correctAnswer.toFixed(2)} m/s²`;
+        
+        explanationDiv.classList.add('show');
+    }
+
+    function showExplanation() {
+        const explanationDiv = document.getElementById('explanation');
+        document.getElementById('calculationSteps').innerHTML = 
+            `용수철저울의 힘: F = ${currentForce} N<br>
+            물체의 질량: m = ${currentMass} kg<br>
+            가속도: a = F ÷ m = ${currentForce} ÷ ${currentMass} = <strong>${correctAnswer.toFixed(2)} m/s²</strong>`;
+        
+        explanationDiv.classList.add('show');
+    }
+
+    function generateNewProblem() {
+        // 랜덤 값 생성
+        const masses = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0];
+        const forces = [2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 20.0];
+        
+        const randomMass = masses[Math.floor(Math.random() * masses.length)];
+        const randomForce = forces[Math.floor(Math.random() * forces.length)];
+        
+        document.getElementById('massInput').value = randomMass;
+        document.getElementById('forceInput').value = randomForce;
+        
+        updateProblem();
+    }
+
+    // 이벤트 리스너 등록
+    document.getElementById('massInput').addEventListener('input', updateProblem);
+    document.getElementById('forceInput').addEventListener('input', updateProblem);
+
+    // Enter 키로 답 확인
+    document.getElementById('answerInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
+    });
+
+    // 초기 문제 설정
+    updateProblem();
+</script>
+```
+
+</body>
+</html>
