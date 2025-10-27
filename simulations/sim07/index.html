@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>등속원운동 문제 연습</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        
+        .problem-section {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .problem-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .problem-text {
+            line-height: 1.8;
+            color: #444;
+            font-size: 1.05em;
+        }
+        
+        .given-values {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .value-item {
+            padding: 10px;
+            background: #e8ecff;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .input-section {
+            background: #fff8f0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .unit {
+            color: #666;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        button {
+            padding: 15px 35px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .new-problem-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .check-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+        
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            animation: slideIn 0.4s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            color: #155724;
+        }
+        
+        .feedback.incorrect {
+            background: #f8d7da;
+            border-left: 5px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .feedback.hidden {
+            display: none;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .feedback-detail {
+            line-height: 1.6;
+        }
+        
+        .solution {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .canvas-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚛️ 등속원운동 문제 연습</h1>
+        <p class="subtitle">물리학2 - 원운동의 주기, 속도, 가속도 계산</p>
+        
+        <div class="canvas-container">
+            <canvas id="motionCanvas" width="550" height="480"></canvas>
+        </div>
+        
+        <div class="problem-section">
+            <div class="problem-title">📋 문제</div>
+            <div class="problem-text" id="problemText"></div>
+            <div class="given-values" id="givenValues"></div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="period">물체 B의 주기 (T)</label>
+                <div class="input-row">
+                    <input type="number" id="period" step="0.01" placeholder="답을 입력하세요">
+                    <span class="unit">초 (s)</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="velocity">물체 B의 속력 (v)</label>
+                <div class="input-row">
+                    <input type="number" id="velocity" step="0.01" placeholder="답을 입력하세요">
+                    <span class="unit">m/s</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="acceleration">물체 B의 구심가속도 (a)</label>
+                <div class="input-row">
+                    <input type="number" id="acceleration" step="0.01" placeholder="답을 입력하세요">
+                    <span class="unit">m/s²</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="new-problem-btn" id="newProblemBtn">🔄 새 문제</button>
+            <button class="check-btn" id="checkBtn">✓ 정답 확인</button>
+        </div>
+        
+        <div class="feedback hidden" id="feedback"></div>
+    </div>
+    
+    <script>
+        let currentProblem = {};
+        let animationId = null;
+        
+        function generateNewProblem() {
+            const radius = Math.round((Math.random() * 3 + 1) * 10) / 10;
+            const massA = Math.round((Math.random() * 3 + 1) * 10) / 10;
+            const massB = Math.round((Math.random() * 3 + 1) * 10) / 10;
+            const frequency = Math.round((Math.random() * 1.5 + 0.5) * 100) / 100;
+            
+            const period = 1 / frequency;
+            const angularVelocity = 2 * Math.PI * frequency;
+            const velocity = radius * angularVelocity;
+            const acceleration = radius * angularVelocity * angularVelocity;
+            
+            currentProblem = {
+                radius: radius,
+                massA: massA,
+                massB: massB,
+                frequency: frequency,
+                period: period,
+                velocity: velocity,
+                acceleration: acceleration,
+                angularVelocity: angularVelocity
+            };
+            
+            document.getElementById('problemText').innerHTML = 
+                `마찰이 없는 수평면에서 중심에 고정된 줄에 물체 A가 매달려 있고, 같은 줄에 연결된 물체 B가 수평면 위에서 등속원운동을 하고 있습니다. 물체 B의 주기, 속력, 구심가속도를 구하시오.`;
+            
+            document.getElementById('givenValues').innerHTML = `
+                <div class="value-item">물체 A의 질량 = ${massA} kg</div>
+                <div class="value-item">물체 B의 질량 = ${massB} kg</div>
+                <div class="value-item">회전 반지름 (r) = ${radius} m</div>
+                <div class="value-item">회전수 (f) = ${frequency} Hz</div>
+            `;
+            
+            document.getElementById('period').value = '';
+            document.getElementById('velocity').value = '';
+            document.getElementById('acceleration').value = '';
+            
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.className = 'feedback hidden';
+            
+            drawCircularMotion();
+        }
+        
+        function drawCircularMotion() {
+            const canvas = document.getElementById('motionCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = canvas.width / 2;
+            const centerY = 220;
+            const scale = 55;
+            const drawRadius = currentProblem.radius * scale;
+            const perspective = 0.35;
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            let angle = 0;
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 수평면 그리기 (투영된 직사각형 형태)
+                const planeExtend = 120;
+                const planeWidth = drawRadius * 2 + planeExtend;
+                const planeDepth = (drawRadius * 2 + planeExtend) * perspective;
+                
+                ctx.save();
+                ctx.beginPath();
+                // 왼쪽 위
+                ctx.moveTo(centerX - planeWidth/2, centerY - planeDepth/2);
+                // 오른쪽 위
+                ctx.lineTo(centerX + planeWidth/2, centerY - planeDepth/2);
+                // 오른쪽 아래
+                ctx.lineTo(centerX + planeWidth/2, centerY + planeDepth/2);
+                // 왼쪽 아래
+                ctx.lineTo(centerX - planeWidth/2, centerY + planeDepth/2);
+                ctx.closePath();
+                
+                ctx.fillStyle = 'rgba(180, 180, 180, 0.25)';
+                ctx.fill();
+                ctx.strokeStyle = '#777';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+                ctx.restore();
+                
+                // "수평면" 텍스트
+                ctx.fillStyle = '#555';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText('수평면', centerX - planeWidth/2 + 20, centerY - planeDepth/2 + 30);
+                
+                // 원궤도 (빨간 점선)
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, drawRadius, drawRadius * perspective, 0, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#ff4757';
+                ctx.lineWidth = 3.5;
+                ctx.setLineDash([12, 7]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // 물체 B 위치 계산
+                const objBX = centerX + drawRadius * Math.cos(angle);
+                const objBY = centerY + drawRadius * perspective * Math.sin(angle);
+                const objBZ = drawRadius * Math.sin(angle);
+                
+                // 중심 고정점
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 7, 0, 2 * Math.PI);
+                ctx.fillStyle = '#2c3e50';
+                ctx.fill();
+                
+                // 물체 A (중심 아래 매달림)
+                const stringLengthA = 90;
+                const objAX = centerX;
+                const objAY = centerY + stringLengthA;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(objAX, objAY);
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(objAX, objAY, 16, 0, 2 * Math.PI);
+                ctx.fillStyle = '#3498db';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 15px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('A', objAX, objAY);
+                
+                // 물체 B (뒤쪽 - 반투명)
+                if (objBZ < 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(objBX, objBY);
+                    ctx.strokeStyle = '#aaa';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([4, 4]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    ctx.beginPath();
+                    ctx.arc(objBX, objBY, 14, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'rgba(231, 76, 60, 0.4)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                }
+                
+                // 물체 B (앞쪽)
+                if (objBZ >= 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(objBX, objBY);
+                    ctx.strokeStyle = '#2c3e50';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.arc(objBX, objBY, 16, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 15px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('B', objBX, objBY);
+                    
+                    // 속도 벡터
+                    const velScale = 55;
+                    const velX = -Math.sin(angle) * velScale;
+                    const velY = -Math.sin(angle) * velScale * perspective;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(objBX, objBY);
+                    ctx.lineTo(objBX + velX, objBY + velY);
+                    ctx.strokeStyle = '#27ae60';
+                    ctx.lineWidth = 3.5;
+                    ctx.stroke();
+                    drawArrow(ctx, objBX, objBY, objBX + velX, objBY + velY, '#27ae60');
+                    
+                    ctx.fillStyle = '#27ae60';
+                    ctx.font = 'bold 15px Arial';
+                    ctx.fillText('v', objBX + velX + 18, objBY + velY - 8);
+                }
+                
+                // 반지름 표시
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = 'bold 15px Arial';
+                ctx.fillText('r', centerX + drawRadius/2 - 5, centerY - 18);
+                
+                angle += 0.025;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function drawArrow(ctx, fromX, fromY, toX, toY, color) {
+            const headlen = 11;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.beginPath();
+            ctx.moveTo(toX - headlen * Math.cos(angle - Math.PI / 6), 
+                       toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), 
+                       toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3.5;
+            ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        
+        function checkAnswer() {
+            const userPeriod = parseFloat(document.getElementById('period').value);
+            const userVelocity = parseFloat(document.getElementById('velocity').value);
+            const userAcceleration = parseFloat(document.getElementById('acceleration').value);
+            
+            if (isNaN(userPeriod) || isNaN(userVelocity) || isNaN(userAcceleration)) {
+                alert('모든 답을 입력해주세요!');
+                return;
+            }
+            
+            const tolerance = 0.1;
+            
+            const periodCorrect = Math.abs(userPeriod - currentProblem.period) <= currentProblem.period * tolerance;
+            const velocityCorrect = Math.abs(userVelocity - currentProblem.velocity) <= currentProblem.velocity * tolerance;
+            const accelerationCorrect = Math.abs(userAcceleration - currentProblem.acceleration) <= currentProblem.acceleration * tolerance;
+            
+            const allCorrect = periodCorrect && velocityCorrect && accelerationCorrect;
+            
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.className = 'feedback';
+            
+            if (allCorrect) {
+                feedbackDiv.className = 'feedback correct';
+                feedbackDiv.innerHTML = `
+                    <div class="feedback-title">🎉 정답입니다!</div>
+                    <div class="feedback-detail">
+                        모든 답이 정확합니다. 잘하셨습니다!
+                    </div>
+                `;
+            } else {
+                feedbackDiv.className = 'feedback incorrect';
+                let details = '<div class="feedback-detail">';
+                
+                if (!periodCorrect) {
+                    details += `❌ 주기: ${userPeriod.toFixed(2)} s (정답: ${currentProblem.period.toFixed(2)} s)<br>`;
+                } else {
+                    details += `✅ 주기: 정답<br>`;
+                }
+                
+                if (!velocityCorrect) {
+                    details += `❌ 속력: ${userVelocity.toFixed(2)} m/s (정답: ${currentProblem.velocity.toFixed(2)} m/s)<br>`;
+                } else {
+                    details += `✅ 속력: 정답<br>`;
+                }
+                
+                if (!accelerationCorrect) {
+                    details += `❌ 구심가속도: ${userAcceleration.toFixed(2)} m/s² (정답: ${currentProblem.acceleration.toFixed(2)} m/s²)<br>`;
+                } else {
+                    details += `✅ 구심가속도: 정답<br>`;
+                }
+                
+                details += `</div>
+                    <div class="solution">
+                        <strong>💡 풀이:</strong><br>
+                        • 주기: T = 1/f = 1/${currentProblem.frequency} = ${currentProblem.period.toFixed(2)} s<br>
+                        • 각속도: ω = 2πf = 2π × ${currentProblem.frequency} = ${currentProblem.angularVelocity.toFixed(2)} rad/s<br>
+                        • 속력: v = rω = ${currentProblem.radius} × ${currentProblem.angularVelocity.toFixed(2)} = ${currentProblem.velocity.toFixed(2)} m/s<br>
+                        • 구심가속도: a = rω² = v²/r = ${currentProblem.velocity.toFixed(2)}²/${currentProblem.radius} = ${currentProblem.acceleration.toFixed(2)} m/s²
+                    </div>
+                `;
+                
+                feedbackDiv.innerHTML = `
+                    <div class="feedback-title">🤔 다시 확인해보세요</div>
+                    ${details}
+                `;
+            }
+        }
+        
+        document.getElementById('newProblemBtn').addEventListener('click', generateNewProblem);
+        document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+        
+        window.addEventListener('load', generateNewProblem);
+    </script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>렌치 토크 계산 시뮬레이션</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        .problem-box {
+            background: #f8f9ff;
+            border-left: 5px solid #667eea;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 20px;
+            line-height: 2;
+        }
+        .problem-box strong {
+            color: #667eea;
+            font-size: 22px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #856404;
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 30px auto;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            display: block;
+        }
+        .choices-container {
+            margin: 30px 0;
+            padding: 20px;
+        }
+        .choice {
+            background: white;
+            border: 3px solid #ddd;
+            padding: 20px 25px;
+            margin: 12px 0;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .choice:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+        .choice.selected {
+            border-color: #667eea;
+            background: #e8eeff;
+            font-weight: bold;
+        }
+        .choice-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .choice.selected .choice-number {
+            background: #764ba2;
+        }
+        .choice.correct-answer {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .choice.correct-answer .choice-number {
+            background: #28a745;
+        }
+        .choice.wrong-answer {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        button {
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .new-problem-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+        .check-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245,87,108,0.4);
+        }
+        .feedback {
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 10px;
+            font-size: 19px;
+            line-height: 1.8;
+            display: none;
+            text-align: center;
+        }
+        .correct {
+            background: #d4edda;
+            color: #155724;
+            border: 3px solid #c3e6cb;
+        }
+        .incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+        }
+        .feedback strong {
+            font-size: 22px;
+        }
+        .formula {
+            background: #e8f4f8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #b8daff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 렌치 토크 계산 문제</h1>
+        
+        <div class="problem-box">
+            <strong>문제:</strong><br>
+            다음 그림과 같이 길이 <span class="highlight"><span id="length-display">20</span> cm</span>인 렌치를 이용해 
+            <span class="highlight"><span id="force-display">10</span> N</span>의 힘을 작용하였을 때 
+            너트에 작용하는 돌림힘의 크기는 몇 N·m인가?<br>
+            (힘의 방향은 렌치와 <span class="highlight"><span id="angle-display">30</span>°</span>의 각을 이룹니다)
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="600" height="300"></canvas>
+        </div>
+
+        <div class="formula">
+            💡 토크(τ) = r × F × sin(θ)
+        </div>
+
+        <div class="choices-container" id="choices">
+            <!-- 선택지가 여기에 생성됩니다 -->
+        </div>
+
+        <div class="button-group">
+            <button class="new-problem-btn" onclick="generateNewProblem()">🔄 새 문제</button>
+            <button class="check-btn" onclick="checkAnswer()">✓ 정답 확인</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <script>
+        let currentProblem = {
+            length: 20,
+            force: 10,
+            angle: 30
+        };
+        let correctAnswer = 0;
+        let selectedChoice = null;
+        let correctChoiceIndex = -1;
+
+        function generateNewProblem() {
+            const lengths = [15, 20, 25, 30, 35, 40, 50];
+            const forces = [5, 8, 10, 12, 15, 20, 25];
+            const angles = [30, 45, 60];
+
+            let newLength, newForce, newAngle;
+            do {
+                newLength = lengths[Math.floor(Math.random() * lengths.length)];
+                newForce = forces[Math.floor(Math.random() * forces.length)];
+                newAngle = angles[Math.floor(Math.random() * angles.length)];
+            } while (newLength === currentProblem.length && 
+                     newForce === currentProblem.force && 
+                     newAngle === currentProblem.angle);
+
+            currentProblem.length = newLength;
+            currentProblem.force = newForce;
+            currentProblem.angle = newAngle;
+
+            document.getElementById('length-display').textContent = currentProblem.length;
+            document.getElementById('force-display').textContent = currentProblem.force;
+            document.getElementById('angle-display').textContent = currentProblem.angle;
+            document.getElementById('feedback').style.display = 'none';
+            selectedChoice = null;
+            correctChoiceIndex = -1;
+
+            // 모든 선택지의 스타일 초기화
+            document.querySelectorAll('.choice').forEach(choice => {
+                choice.classList.remove('selected', 'correct-answer', 'wrong-answer');
+            });
+
+            drawDiagram();
+            generateChoices();
+        }
+
+        function generateChoices() {
+            const lengthInMeters = currentProblem.length / 100;
+            const angleRad = currentProblem.angle * Math.PI / 180;
+            correctAnswer = lengthInMeters * currentProblem.force * Math.sin(angleRad);
+
+            // 오답 생성 전략
+            const wrongAnswers = [
+                correctAnswer * 2,                          // 단위 변환 실수
+                currentProblem.length * currentProblem.force / 100,  // sin 빠뜨림
+                lengthInMeters * currentProblem.force,      // sin 빠뜨림
+            ];
+
+            // 4지선다 생성
+            let choices = [correctAnswer];
+            let usedValues = new Set([correctAnswer.toFixed(2)]);
+
+            for (let wrong of wrongAnswers) {
+                if (choices.length >= 4) break;
+                const wrongStr = wrong.toFixed(2);
+                if (!usedValues.has(wrongStr) && wrong > 0) {
+                    choices.push(wrong);
+                    usedValues.add(wrongStr);
+                }
+            }
+
+            // 부족하면 랜덤 오답 추가
+            while (choices.length < 4) {
+                const randomWrong = correctAnswer * (0.3 + Math.random() * 1.5);
+                const wrongStr = randomWrong.toFixed(2);
+                if (!usedValues.has(wrongStr) && randomWrong > 0) {
+                    choices.push(randomWrong);
+                    usedValues.add(wrongStr);
+                }
+            }
+
+            // 섞기
+            choices.sort(() => Math.random() - 0.5);
+
+            // 정답 인덱스 찾기
+            correctChoiceIndex = choices.findIndex(c => Math.abs(c - correctAnswer) < 0.01);
+
+            // HTML 생성
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            const choiceNumbers = ['1', '2', '3', '4'];
+            choices.forEach((choice, index) => {
+                const choiceDiv = document.createElement('div');
+                choiceDiv.className = 'choice';
+                choiceDiv.innerHTML = `
+                    <span class="choice-number">${choiceNumbers[index]}</span>
+                    ${choice.toFixed(2)} N·m
+                `;
+                choiceDiv.onclick = () => selectChoice(index, choice);
+                choicesContainer.appendChild(choiceDiv);
+            });
+        }
+
+        function selectChoice(index, value) {
+            document.querySelectorAll('.choice').forEach((choice, i) => {
+                if (i === index) {
+                    choice.classList.add('selected');
+                } else {
+                    choice.classList.remove('selected');
+                }
+            });
+            selectedChoice = value;
+        }
+
+        function drawDiagram() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = 120;
+            const centerY = 150;
+            const wrenchLength = Math.min(currentProblem.length * 6, 300);
+            const angleRad = currentProblem.angle * Math.PI / 180;
+
+            // 수평 기준선 (점선) - 렌치 전체 길이에 걸쳐
+            ctx.strokeStyle = '#bbb';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(centerX - 50, centerY);
+            ctx.lineTo(centerX + wrenchLength + 100, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 수직 축선 (렌치 끝부분)
+            ctx.strokeStyle = '#bbb';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(centerX + wrenchLength, centerY - 60);
+            ctx.lineTo(centerX + wrenchLength, centerY + 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 렌치 핸들 부분 (손잡이)
+            const handleWidth = 16;
+            const handleGripStart = 40;
+            
+            // 렌치 메인 바디
+            ctx.fillStyle = '#5a5a5a';
+            ctx.fillRect(centerX - handleGripStart, centerY - handleWidth/2, wrenchLength + handleGripStart - 20, handleWidth);
+            
+            // 렌치 외곽선
+            ctx.strokeStyle = '#2a2a2a';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX - handleGripStart, centerY - handleWidth/2, wrenchLength + handleGripStart - 20, handleWidth);
+            
+            // 손잡이 그립 무늬
+            ctx.strokeStyle = '#404040';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 6; i++) {
+                const x = centerX - handleGripStart + 5 + i * 6;
+                ctx.beginPath();
+                ctx.moveTo(x, centerY - handleWidth/2 + 2);
+                ctx.lineTo(x, centerY + handleWidth/2 - 2);
+                ctx.stroke();
+            }
+
+            // 렌치 헤드 부분 (소켓)
+            const headX = centerX + wrenchLength;
+            const headSize = 24;
+            
+            // 소켓 외부 (육각형)
+            ctx.save();
+            ctx.translate(headX, centerY);
+            ctx.rotate(Math.PI / 6);
+            
+            ctx.fillStyle = '#707070';
+            ctx.strokeStyle = '#2a2a2a';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                const x = headSize * Math.cos(angle);
+                const y = headSize * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // 소켓 내부 (작은 육각형)
+            ctx.fillStyle = '#505050';
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                const x = (headSize - 8) * Math.cos(angle);
+                const y = (headSize - 8) * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+
+            // 중심 너트 (볼트 머리)
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // 너트 본체 (육각형)
+            ctx.fillStyle = '#888';
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i;
+                const x = 22 * Math.cos(angle);
+                const y = 22 * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // 너트 중앙 홈
+            ctx.fillStyle = '#555';
+            ctx.fillRect(-12, -2, 24, 4);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-12, -2, 24, 4);
+            
+            ctx.restore();
+
+            // 중심점 O 표시
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('O', centerX - 10, centerY - 40);
+
+            // 길이 표시
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 45);
+            ctx.lineTo(centerX + wrenchLength, centerY - 45);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 50);
+            ctx.lineTo(centerX, centerY - 40);
+            ctx.moveTo(centerX + wrenchLength, centerY - 50);
+            ctx.lineTo(centerX + wrenchLength, centerY - 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(currentProblem.length + ' cm', centerX + wrenchLength/2 - 30, centerY - 58);
+
+            // 힘 벡터
+            const forceStartX = centerX + wrenchLength;
+            const forceStartY = centerY;
+            const forceLength = 100;
+            const forceEndX = forceStartX + forceLength * Math.cos(angleRad);
+            const forceEndY = forceStartY - forceLength * Math.sin(angleRad);
+
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(forceStartX, forceStartY);
+            ctx.lineTo(forceEndX, forceEndY);
+            ctx.stroke();
+
+            // 화살표
+            const arrowSize = 15;
+            const arrowAngle = Math.atan2(forceStartY - forceEndY, forceStartX - forceEndX);
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.moveTo(forceEndX, forceEndY);
+            ctx.lineTo(
+                forceEndX + arrowSize * Math.cos(arrowAngle - Math.PI/6),
+                forceEndY + arrowSize * Math.sin(arrowAngle - Math.PI/6)
+            );
+            ctx.lineTo(
+                forceEndX + arrowSize * Math.cos(arrowAngle + Math.PI/6),
+                forceEndY + arrowSize * Math.sin(arrowAngle + Math.PI/6)
+            );
+            ctx.closePath();
+            ctx.fill();
+
+            // 힘 표시
+            ctx.fillStyle = '#c0392b';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('F = ' + currentProblem.force + ' N', forceEndX + 10, forceEndY - 15);
+
+            // 각도 표시
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(forceStartX, forceStartY, 45, -angleRad, 0);
+            ctx.stroke();
+
+            ctx.fillStyle = '#2980b9';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(currentProblem.angle + '°', forceStartX + 50, forceStartY - 20);
+        }
+
+        function checkAnswer() {
+            if (selectedChoice === null) {
+                alert('답을 선택해주세요!');
+                return;
+            }
+
+            const lengthInMeters = currentProblem.length / 100;
+            const angleRad = currentProblem.angle * Math.PI / 180;
+            
+            const feedback = document.getElementById('feedback');
+            const tolerance = 0.01;
+            const allChoices = document.querySelectorAll('.choice');
+
+            if (Math.abs(selectedChoice - correctAnswer) < tolerance) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <strong>✓ 정답입니다! 🎉</strong><br>
+                    <strong>📝 풀이:</strong> ${currentProblem.length}cm를 m로 변환(${lengthInMeters.toFixed(2)}m) → 
+                    τ = ${lengthInMeters.toFixed(2)} × ${currentProblem.force} × sin(${currentProblem.angle}°) = 
+                    ${lengthInMeters.toFixed(2)} × ${currentProblem.force} × ${Math.sin(angleRad).toFixed(3)} = 
+                    <strong>${correctAnswer.toFixed(2)} N·m</strong>
+                `;
+            } else {
+                // 틀린 답에는 빨간색, 정답에는 초록색 표시
+                allChoices.forEach((choice, index) => {
+                    if (index === correctChoiceIndex) {
+                        choice.classList.add('correct-answer');
+                    }
+                });
+                
+                const selectedIndex = Array.from(allChoices).findIndex(c => c.classList.contains('selected'));
+                if (selectedIndex !== -1) {
+                    allChoices[selectedIndex].classList.add('wrong-answer');
+                }
+
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <strong>✗ 틀렸습니다!</strong><br>
+                    💡 풀이: cm를 m로 변환(${currentProblem.length}cm ÷ 100 = ${lengthInMeters.toFixed(2)}m) → 
+                    τ = ${lengthInMeters.toFixed(2)} × ${currentProblem.force} × sin(${currentProblem.angle}°) = 
+                    ${lengthInMeters.toFixed(2)} × ${currentProblem.force} × ${Math.sin(angleRad).toFixed(3)} = 
+                    <strong>${correctAnswer.toFixed(2)} N·m</strong><br>
+                    위에서 초록색으로 표시된 항목이 정답입니다.
+                `;
+            }
+            feedback.style.display = 'block';
+        }
+
+        // 초기 문제 생성
+        generateNewProblem();
+    </script>
+</body>
+</html>

@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>토크 평형 문제 시뮬레이터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #2c3e50 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '⚖️ 🔬 📐 ⚙️ 🧲 ⚡ 📊 🎯 ⚗️ 🔭';
+            position: fixed;
+            top: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 30px;
+            opacity: 0.2;
+            pointer-events: none;
+            letter-spacing: 40px;
+        }
+        body::after {
+            content: '🌀 💡 🔧 📏 ⚛️ 🧪 📈 🎓 🔬 ⚙️';
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 30px;
+            opacity: 0.2;
+            pointer-events: none;
+            letter-spacing: 40px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 35px;
+            position: relative;
+            border: 4px solid #4a90e2;
+        }
+        .container::before {
+            content: '🔬';
+            position: absolute;
+            top: -30px;
+            left: 20px;
+            font-size: 50px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .container::after {
+            content: '⚗️';
+            position: absolute;
+            top: -30px;
+            right: 20px;
+            font-size: 50px;
+            animation: float 3s ease-in-out infinite 1.5s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #4a90e2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            position: relative;
+        }
+        h1::before {
+            content: '⚡';
+            position: absolute;
+            left: -40px;
+            animation: pulse 2s infinite;
+        }
+        h1::after {
+            content: '⚡';
+            position: absolute;
+            right: -40px;
+            animation: pulse 2s infinite 1s;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.3); }
+        }
+        .subtitle {
+            text-align: center;
+            color: #4a90e2;
+            font-size: 15px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .subtitle::before {
+            content: '🧲 ';
+        }
+        .subtitle::after {
+            content: ' ⚙️';
+        }
+        .controls {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+            border: 3px solid #4a90e2;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .control-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c5364;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .control-group label::before {
+            content: '⚙️';
+            font-size: 16px;
+        }
+        .control-group select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .control-group select:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 10px 5px;
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+            border: 3px solid white;
+        }
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.6);
+        }
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+        .problem-box {
+            background: linear-gradient(135deg, #fff 0%, #f0f7ff 100%);
+            border: 4px solid #5c9ce6;
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(92, 156, 230, 0.2);
+            position: relative;
+        }
+        .problem-box::before {
+            content: '⚛️';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+            background: white;
+            padding: 5px 15px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .problem-text {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+            margin-top: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #e8f4f8 0%, #dceefb 100%);
+            border-radius: 15px;
+            border-left: 5px solid #4a90e2;
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.2);
+            border: 3px solid #60a5fa;
+        }
+        canvas {
+            border: 3px solid #4a90e2;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
+        }
+        .choices {
+            margin-top: 20px;
+        }
+        .choice {
+            background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+            padding: 15px 20px;
+            margin: 12px 0;
+            border-radius: 15px;
+            border: 3px solid #bfdbfe;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(191, 219, 254, 0.3);
+            position: relative;
+        }
+        .choice::before {
+            content: '📐';
+            position: absolute;
+            left: -30px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .choice:hover {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+            border-color: #4a90e2;
+            transform: translateX(10px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+        .choice:hover::before {
+            opacity: 1;
+            left: -35px;
+        }
+        .choice.selected {
+            background: linear-gradient(135deg, #667eea 0%, #4a90e2 100%);
+            color: white;
+            border-color: #4a90e2;
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.5);
+            transform: scale(1.02);
+        }
+        .choice.correct {
+            background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+            color: white;
+            border-color: #00b894;
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.5);
+            animation: correctPulse 0.5s;
+        }
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .choice.wrong {
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            color: white;
+            border-color: #d63031;
+            box-shadow: 0 8px 25px rgba(214, 48, 49, 0.5);
+            animation: wrongShake 0.5s;
+        }
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .check-btn-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+        .solution {
+            margin-top: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 20px;
+            border: 4px solid #0ea5e9;
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+        .solution h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .solution-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 2;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .solution-content strong {
+            color: #0369a1;
+            font-size: 17px;
+        }
+        .formula {
+            background: #f0f9ff;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+            font-family: 'Courier New', monospace;
+            color: #0c4a6e;
+        }
+        .highlight {
+            background: linear-gradient(120deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #60a5fa;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        .choice-analysis {
+            background: #f0f9ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+        .choice-analysis.correct-analysis {
+            background: #f0fdf4;
+            border-left-color: #22c55e;
+        }
+        .choice-analysis.wrong-analysis {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 25px;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+            border: 3px solid #60a5fa;
+        }
+        .stat-item {
+            text-align: center;
+            position: relative;
+        }
+        .stat-item::before {
+            content: '⚙️';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #4a90e2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #1e40af;
+            margin-top: 5px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚖️ 토크 평형 문제 시뮬레이터</h1>
+        <div class="subtitle">물리학2 돌림힘 평형 문제를 무한 연습하세요!</div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>문제 유형</label>
+                <select id="questionType">
+                    <option value="random">🎲 랜덤</option>
+                    <option value="torqueA">📐 A의 토크 구하기</option>
+                    <option value="torqueB">📐 B의 토크 구하기</option>
+                    <option value="directionB">🔄 B의 토크 방향</option>
+                    <option value="direction">🔄 토크 방향 비교</option>
+                    <option value="weightA">⚖️ A의 무게 구하기</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="generateProblem()">🎲 새 문제 생성</button>
+            <button class="btn" onclick="resetStats()">🔄 통계 초기화</button>
+        </div>
+
+        <div class="problem-box">
+            <div class="problem-text" id="problemText"></div>
+            <div class="canvas-container">
+                <canvas id="canvas" width="500" height="180"></canvas>
+            </div>
+            <div class="choices" id="choices"></div>
+            <div class="check-btn-container">
+                <button class="btn" onclick="checkAnswer()">✓ 정답 확인</button>
+            </div>
+            <div id="result" style="display: none;"></div>
+            <div id="solution"></div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalProblems">0</div>
+                <div class="stat-label">총 문제</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="correctCount">0</div>
+                <div class="stat-label">정답</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="wrongCount">0</div>
+                <div class="stat-label">오답</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">0%</div>
+                <div class="stat-label">정답률</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = null;
+        let selectedChoice = null;
+        let stats = { total: 0, correct: 0, wrong: 0 };
+
+        function formatNumber(num) {
+            return Number.isInteger(num) ? num.toString() : num.toFixed(1);
+        }
+
+        function generateRandomProblem() {
+            const rodLength = 100;
+            const possiblePositions = [10, 20, 30, 40];
+            const possibleWeights = [10, 20, 30, 40];
+            
+            const posA = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+            const possiblePosB = [60, 70, 80, 90];
+            const posB = possiblePosB[Math.floor(Math.random() * possiblePosB.length)];
+            const weightB = possibleWeights[Math.floor(Math.random() * possibleWeights.length)];
+            
+            return { rodLength, posA, posB, weightB };
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function generateProblem() {
+            const { rodLength, posA, posB, weightB } = generateRandomProblem();
+            let questionType = document.getElementById('questionType').value;
+            
+            if (questionType === 'random') {
+                const types = ['torqueA', 'torqueB', 'directionB', 'direction', 'weightA'];
+                questionType = types[Math.floor(Math.random() * types.length)];
+            }
+
+            const pivot = rodLength / 2;
+            const distA_m = Math.abs(pivot - posA) / 100;
+            const distB_m = Math.abs(pivot - posB) / 100;
+            const weightA = (weightB * distB_m) / distA_m;
+            const torqueA = weightA * distA_m;
+            const torqueB = weightB * distB_m;
+
+            currentProblem = {
+                rodLength, posA, weightB, posB, pivot,
+                distA_m, distB_m, weightA, torqueA, torqueB, 
+                questionType
+            };
+
+            drawProblem();
+            generateChoices();
+            document.getElementById('solution').innerHTML = '';
+            selectedChoice = null;
+        }
+
+        function drawProblem() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const p = currentProblem;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = 4;
+            const yRod = 90;
+            const xOffset = 40;
+
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(xOffset, yRod - 5, p.rodLength * scale, 10);
+
+            ctx.fillStyle = '#333';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= p.rodLength; i += 10) {
+                const x = xOffset + i * scale;
+                ctx.fillRect(x - 0.5, yRod + 6, 1, 5);
+                if (i % 20 === 0) {
+                    ctx.fillText(i, x, yRod + 20);
+                }
+            }
+
+            const pivotX = xOffset + p.pivot * scale;
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.moveTo(pivotX - 10, yRod - 22);
+            ctx.lineTo(pivotX + 10, yRod - 22);
+            ctx.lineTo(pivotX, yRod - 5);
+            ctx.closePath();
+            ctx.fill();
+
+            const xA = xOffset + p.posA * scale;
+            ctx.fillStyle = '#667eea';
+            ctx.fillRect(xA - 12, yRod + 5, 24, 24);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(xA - 12, yRod + 5, 24, 24);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('A', xA, yRod + 21);
+
+            const xB = xOffset + p.posB * scale;
+            ctx.fillStyle = '#764ba2';
+            ctx.fillRect(xB - 12, yRod + 5, 24, 24);
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(xB - 12, yRod + 5, 24, 24);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('B', xB, yRod + 21);
+
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(p.weightB + ' N', xB, yRod + 45);
+
+            ctx.fillStyle = '#666';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('(cm)', xOffset + p.rodLength * scale + 12, yRod + 20);
+        }
+
+        function generateChoices() {
+            const p = currentProblem;
+            const choicesDiv = document.getElementById('choices');
+            const problemText = document.getElementById('problemText');
+            const isRandomMode = document.getElementById('questionType').value === 'random';
+            
+            let choicesData = [];
+            let question = `그림과 같이 길이가 ${p.rodLength} cm인 자의 중앙을 실로 매단 후 물체 A를 자의 눈금 ${p.posA} cm 되는 곳에 매달고, 무게 ${p.weightB} N인 물체 B를 눈금 ${p.posB} cm 되는 곳에 매달았더니 돌림힘이 평형을 이루게 되었다.<br><br>`;
+
+            if (isRandomMode) {
+                question += `이에 대한 설명으로 옳은 것은?`;
+                
+                // 정답 선지 1개 + 오답 선지 4개 만들기
+                let correctChoice = null;
+                let wrongChoices = [];
+                
+                if (p.questionType === 'torqueA') {
+                    correctChoice = { text: `A에 의한 돌림힘의 크기는 ${formatNumber(p.torqueA)} N·m이다.`, type: 'torqueA', correct: true };
+                    wrongChoices = [
+                        { text: `B에 의한 돌림힘의 크기는 ${formatNumber(p.torqueB * 1.5)} N·m이다.`, type: 'torqueB_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 방향은 시계 반대 방향이다.`, type: 'directionB_wrong', correct: false },
+                        { text: `A, B에 의한 돌림힘의 방향은 같다.`, type: 'direction_wrong', correct: false },
+                        { text: `A의 무게는 ${formatNumber(p.weightA * 2)} N이다.`, type: 'weightA_wrong', correct: false }
+                    ];
+                } else if (p.questionType === 'torqueB') {
+                    correctChoice = { text: `B에 의한 돌림힘의 크기는 ${formatNumber(p.torqueB)} N·m이다.`, type: 'torqueB', correct: true };
+                    wrongChoices = [
+                        { text: `A에 의한 돌림힘의 크기는 ${formatNumber(p.torqueA * 0.5)} N·m이다.`, type: 'torqueA_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 방향은 시계 반대 방향이다.`, type: 'directionB_wrong', correct: false },
+                        { text: `A, B에 의한 돌림힘의 방향은 같다.`, type: 'direction_wrong', correct: false },
+                        { text: `A의 무게는 ${formatNumber(p.weightA * 0.5)} N이다.`, type: 'weightA_wrong', correct: false }
+                    ];
+                } else if (p.questionType === 'directionB') {
+                    correctChoice = { text: `B에 의한 돌림힘의 방향은 시계 방향이다.`, type: 'directionB', correct: true };
+                    wrongChoices = [
+                        { text: `A에 의한 돌림힘의 크기는 ${formatNumber(p.torqueA * 1.5)} N·m이다.`, type: 'torqueA_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 크기는 ${formatNumber(p.torqueB * 2)} N·m이다.`, type: 'torqueB_wrong', correct: false },
+                        { text: `A, B에 의한 돌림힘의 방향은 같다.`, type: 'direction_wrong', correct: false },
+                        { text: `A의 무게는 ${formatNumber(p.weightA * 1.5)} N이다.`, type: 'weightA_wrong', correct: false }
+                    ];
+                } else if (p.questionType === 'direction') {
+                    correctChoice = { text: `A, B에 의한 돌림힘의 방향은 반대이다.`, type: 'direction', correct: true };
+                    wrongChoices = [
+                        { text: `A에 의한 돌림힘의 크기는 ${formatNumber(p.torqueA * 0.75)} N·m이다.`, type: 'torqueA_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 크기는 ${formatNumber(p.torqueB * 1.2)} N·m이다.`, type: 'torqueB_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 방향은 시계 반대 방향이다.`, type: 'directionB_wrong', correct: false },
+                        { text: `A의 무게는 ${formatNumber(p.weightA * 0.8)} N이다.`, type: 'weightA_wrong', correct: false }
+                    ];
+                } else if (p.questionType === 'weightA') {
+                    correctChoice = { text: `A의 무게는 ${formatNumber(p.weightA)} N이다.`, type: 'weightA', correct: true };
+                    wrongChoices = [
+                        { text: `A에 의한 돌림힘의 크기는 ${formatNumber(p.torqueA * 2)} N·m이다.`, type: 'torqueA_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 크기는 ${formatNumber(p.torqueB * 0.5)} N·m이다.`, type: 'torqueB_wrong', correct: false },
+                        { text: `B에 의한 돌림힘의 방향은 시계 반대 방향이다.`, type: 'directionB_wrong', correct: false },
+                        { text: `A, B에 의한 돌림힘의 방향은 같다.`, type: 'direction_wrong', correct: false }
+                    ];
+                }
+                
+                choicesData = [correctChoice, ...wrongChoices];
+            } 
+            else {
+                if (p.questionType === 'torqueA') {
+                    question += `물체 A에 의한 돌림힘의 크기는 몇 N·m인가?`;
+                    const correct = p.torqueA;
+                    choicesData = [
+                        { text: `${formatNumber(correct)} N·m`, correct: true },
+                        { text: `${formatNumber(correct * 0.5)} N·m`, correct: false },
+                        { text: `${formatNumber(correct * 1.5)} N·m`, correct: false },
+                        { text: `${formatNumber(correct * 2)} N·m`, correct: false },
+                        { text: `${formatNumber(correct * 0.75)} N·m`, correct: false }
+                    ];
+                } else if (p.questionType === 'torqueB') {
+                    question += `물체 B에 의한 돌림힘의 크기는 몇 N·m인가?`;
+                    const correct = p.torqueB;
+                    choicesData = [
+                        { text: `${formatNumber(correct)} N·m`, correct: true },
+                        { text: `${formatNumber(correct * 0.5)} N·m`, correct: false },
+                        { text: `${formatNumber(correct * 1.5)} N·m`, correct: false },
+                        { text: `${formatNumber(correct * 2)} N·m`, correct: false },
+                        { text: `${formatNumber(correct * 0.8)} N·m`, correct: false }
+                    ];
+                } else if (p.questionType === 'weightA') {
+                    question += `물체 A의 무게는 몇 N인가?`;
+                    const correct = p.weightA;
+                    choicesData = [
+                        { text: `${formatNumber(correct)} N`, correct: true },
+                        { text: `${formatNumber(correct * 0.5)} N`, correct: false },
+                        { text: `${formatNumber(correct * 1.5)} N`, correct: false },
+                        { text: `${formatNumber(correct * 2)} N`, correct: false },
+                        { text: `${formatNumber(correct * 0.75)} N`, correct: false }
+                    ];
+                } else if (p.questionType === 'directionB') {
+                    question += `물체 B에 의한 돌림힘의 방향은?`;
+                    choicesData = [
+                        { text: `시계 방향`, correct: true },
+                        { text: `시계 반대 방향`, correct: false },
+                        { text: `위쪽`, correct: false },
+                        { text: `아래쪽`, correct: false },
+                        { text: `방향이 없다`, correct: false }
+                    ];
+                } else if (p.questionType === 'direction') {
+                    question += `A와 B의 돌림힘 방향 관계는?`;
+                    choicesData = [
+                        { text: `A, B 모두 시계 방향`, correct: false },
+                        { text: `A, B 모두 시계 반대 방향`, correct: false },
+                        { text: `A는 시계, B는 반시계`, correct: false },
+                        { text: `평형을 이루므로 방향이 반대`, correct: true },
+                        { text: `방향을 정의할 수 없다`, correct: false }
+                    ];
+                }
+            }
+
+            choicesData = shuffleArray(choicesData);
+            const correctAnswer = choicesData.findIndex(choice => choice.correct === true);
+
+            problemText.innerHTML = question;
+            choicesDiv.innerHTML = '';
+            
+            choicesData.forEach((choice, index) => {
+                const div = document.createElement('div');
+                div.className = 'choice';
+                const choiceNumber = ['①', '②', '③', '④', '⑤'][index];
+                div.innerHTML = `${choiceNumber} ${choice.text}`;
+                div.onclick = () => selectChoice(index);
+                choicesDiv.appendChild(div);
+            });
+
+            currentProblem.correctAnswer = correctAnswer;
+            currentProblem.choicesData = choicesData;
+        }
+
+        function selectChoice(index) {
+            const choices = document.querySelectorAll('.choice');
+            choices.forEach(c => c.classList.remove('selected'));
+            choices[index].classList.add('selected');
+            selectedChoice = index;
+        }
+
+        function checkAnswer() {
+            if (selectedChoice === null) {
+                alert('선지를 선택해주세요!');
+                return;
+            }
+
+            const choices = document.querySelectorAll('.choice');
+            const solutionDiv = document.getElementById('solution');
+
+            stats.total++;
+
+            if (selectedChoice === currentProblem.correctAnswer) {
+                choices[selectedChoice].classList.add('correct');
+                stats.correct++;
+                solutionDiv.innerHTML = '';
+            } else {
+                choices[selectedChoice].classList.add('wrong');
+                choices[currentProblem.correctAnswer].classList.add('correct');
+                stats.wrong++;
+                showSolution();
+            }
+
+            updateStats();
+            choices.forEach(c => { c.onclick = null; });
+        }
+
+        function showSolution() {
+            const p = currentProblem;
+            const solutionDiv = document.getElementById('solution');
+            const isRandomMode = document.getElementById('questionType').value === 'random';
+            
+            const distA_cm = Math.abs(p.pivot - p.posA);
+            const distB_cm = Math.abs(p.pivot - p.posB);
+            
+            let solutionHTML = `
+                <div class="solution">
+                    <h3>📝 풀이</h3>
+                    <div class="solution-content">
+            `;
+
+            // 랜덤 모드: 각 선지 분석
+            if (isRandomMode) {
+                solutionHTML += `<strong>📌 각 선지 분석</strong><br><br>`;
+                
+                currentProblem.choicesData.forEach((choice, index) => {
+                    const isCorrect = choice.correct;
+                    const choiceNum = ['①', '②', '③', '④', '⑤'][index];
+                    const cssClass = isCorrect ? 'correct-analysis' : 'wrong-analysis';
+                    const icon = isCorrect ? '✅' : '❌';
+                    
+                    solutionHTML += `<div class="choice-analysis ${cssClass}">`;
+                    solutionHTML += `<strong>${icon} ${choiceNum} ${choice.text}</strong><br>`;
+                    
+                    // 정답 선지 설명
+                    if (choice.type === 'torqueA' && isCorrect) {
+                        solutionHTML += `
+                            • 계산: τ_A = F_A × r_A = ${formatNumber(p.weightA)} N × ${p.distA_m} m = ${formatNumber(p.torqueA)} N·m<br>
+                            • ✅ 이 선지는 정답입니다!
+                        `;
+                    } else if (choice.type === 'torqueB' && isCorrect) {
+                        solutionHTML += `
+                            • 계산: τ_B = F_B × r_B = ${p.weightB} N × ${p.distB_m} m = ${formatNumber(p.torqueB)} N·m<br>
+                            • ✅ 이 선지는 정답입니다!
+                        `;
+                    } else if (choice.type === 'directionB' && isCorrect) {
+                        solutionHTML += `
+                            • B는 회전축(50cm) 오른쪽(${p.posB}cm)에 위치<br>
+                            • 오른쪽에서 아래로 당김 → <strong>시계 방향 ↻</strong><br>
+                            • ✅ 이 선지는 정답입니다!
+                        `;
+                    } else if (choice.type === 'direction' && isCorrect) {
+                        solutionHTML += `
+                            • A: 왼쪽(${p.posA}cm)에서 아래로 → 시계 반대 방향 ↺<br>
+                            • B: 오른쪽(${p.posB}cm)에서 아래로 → 시계 방향 ↻<br>
+                            • 평형 상태 → 두 방향은 <strong>반대</strong><br>
+                            • ✅ 이 선지는 정답입니다!
+                        `;
+                    } else if (choice.type === 'weightA' && isCorrect) {
+                        solutionHTML += `
+                            • 평형 조건: F_A × ${p.distA_m} = ${p.weightB} × ${p.distB_m}<br>
+                            • F_A = (${p.weightB} × ${p.distB_m}) ÷ ${p.distA_m} = ${formatNumber(p.weightA)} N<br>
+                            • ✅ 이 선지는 정답입니다!
+                        `;
+                    }
+                    // 오답 선지 설명
+                    else if (choice.type === 'torqueA_wrong' || (choice.type === 'torqueA' && !isCorrect)) {
+                        solutionHTML += `
+                            • 실제 A의 토크: τ_A = ${formatNumber(p.weightA)} × ${p.distA_m} = ${formatNumber(p.torqueA)} N·m<br>
+                            • 선지의 값과 다르므로 ❌ 틀렸습니다.
+                        `;
+                    } else if (choice.type === 'torqueB_wrong' || (choice.type === 'torqueB' && !isCorrect)) {
+                        solutionHTML += `
+                            • 실제 B의 토크: τ_B = ${p.weightB} × ${p.distB_m} = ${formatNumber(p.torqueB)} N·m<br>
+                            • 선지의 값과 다르므로 ❌ 틀렸습니다.
+                        `;
+                    } else if (choice.type === 'directionB_wrong' || (choice.type === 'directionB' && !isCorrect)) {
+                        solutionHTML += `
+                            • B는 회전축 오른쪽에 위치 → 실제로는 <strong>시계 방향</strong><br>
+                            • 선지의 방향이 틀렸으므로 ❌ 오답입니다.
+                        `;
+                    } else if (choice.type === 'direction_wrong' || (choice.type === 'direction' && !isCorrect)) {
+                        solutionHTML += `
+                            • A는 시계 반대 방향, B는 시계 방향<br>
+                            • 실제로는 <strong>반대 방향</strong>이므로 ❌ 틀렸습니다.
+                        `;
+                    } else if (choice.type === 'weightA_wrong' || (choice.type === 'weightA' && !isCorrect)) {
+                        solutionHTML += `
+                            • 평형 조건: F_A × ${p.distA_m} = ${p.weightB} × ${p.distB_m}<br>
+                            • 실제 A의 무게: ${formatNumber(p.weightA)} N<br>
+                            • 선지의 값과 다르므로 ❌ 틀렸습니다.
+                        `;
+                    }
+                    
+                    solutionHTML += `</div>`;
+                });
+                
+                solutionHTML += `
+                    <div class="highlight">
+                        💡 정답: ${['①', '②', '③', '④', '⑤'][currentProblem.correctAnswer]}번
+                    </div>
+                `;
+            }
+            // 일반 모드: 해당 유형만 설명
+            else {
+                solutionHTML += `<strong>📐 기본 정보</strong>`;
+                solutionHTML += `
+                    <div class="formula">
+                        회전축으로부터 거리: A = ${distA_cm} cm (${p.distA_m} m), B = ${distB_cm} cm (${p.distB_m} m)
+                    </div>
+                `;
+                
+                if (p.questionType === 'torqueA') {
+                    solutionHTML += `
+                        <strong>🎯 A의 토크 계산</strong>
+                        <div class="formula">
+                            1단계: 평형 조건으로 A의 무게 구하기<br>
+                            F_A × ${p.distA_m} = ${p.weightB} × ${p.distB_m}<br>
+                            F_A = (${p.weightB} × ${p.distB_m}) ÷ ${p.distA_m} = ${formatNumber(p.weightA)} N
+                        </div>
+                        <div class="formula">
+                            2단계: A의 토크 계산<br>
+                            τ_A = F_A × r_A = ${formatNumber(p.weightA)} × ${p.distA_m} = <strong>${formatNumber(p.torqueA)} N·m</strong>
+                        </div>
+                        <div class="highlight">
+                            💡 정답: ${formatNumber(p.torqueA)} N·m
+                        </div>
+                    `;
+                } else if (p.questionType === 'torqueB') {
+                    solutionHTML += `
+                        <strong>🎯 B의 토크 계산</strong>
+                        <div class="formula">
+                            τ_B = F_B × r_B = ${p.weightB} × ${p.distB_m} = <strong>${formatNumber(p.torqueB)} N·m</strong>
+                        </div>
+                        <div class="highlight">
+                            💡 정답: ${formatNumber(p.torqueB)} N·m
+                        </div>
+                    `;
+                } else if (p.questionType === 'directionB') {
+                    solutionHTML += `
+                        <strong>🎯 B의 토크 방향</strong>
+                        <div class="formula">
+                            • B의 위치: 회전축(50cm) 오른쪽(${p.posB}cm)<br>
+                            • B는 아래로 당김<br>
+                            • 회전축을 기준으로 오른쪽에서 아래로 → <strong>시계 방향 ↻</strong>
+                        </div>
+                        <div class="highlight">
+                            💡 정답: 시계 방향
+                        </div>
+                    `;
+                } else if (p.questionType === 'direction') {
+                    solutionHTML += `
+                        <strong>🎯 A와 B의 방향 관계</strong>
+                        <div class="formula">
+                            • A의 방향: 회전축 왼쪽에서 아래로 → 시계 반대 방향 ↺<br>
+                            • B의 방향: 회전축 오른쪽에서 아래로 → 시계 방향 ↻<br>
+                            • 평형 상태 → 두 토크의 방향은 <strong>반대</strong>
+                        </div>
+                        <div class="highlight">
+                            💡 정답: 평형을 이루므로 방향이 반대
+                        </div>
+                    `;
+                } else if (p.questionType === 'weightA') {
+                    solutionHTML += `
+                        <strong>🎯 A의 무게 계산</strong>
+                        <div class="formula">
+                            평형 조건: τ_A = τ_B<br>
+                            F_A × ${p.distA_m} = ${p.weightB} × ${p.distB_m}<br>
+                            F_A = (${p.weightB} × ${p.distB_m}) ÷ ${p.distA_m}<br>
+                            F_A = <strong>${formatNumber(p.weightA)} N</strong>
+                        </div>
+                        <div class="highlight">
+                            💡 정답: ${formatNumber(p.weightA)} N
+                        </div>
+                    `;
+                }
+            }
+            
+            solutionHTML += `
+                    </div>
+                </div>
+            `;
+            
+            solutionDiv.innerHTML = solutionHTML;
+        }
+
+        function updateStats() {
+            document.getElementById('totalProblems').textContent = stats.total;
+            document.getElementById('correctCount').textContent = stats.correct;
+            document.getElementById('wrongCount').textContent = stats.wrong;
+            
+            const accuracy = stats.total > 0 ? ((stats.correct / stats.total) * 100).toFixed(1) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function resetStats() {
+            if (confirm('통계를 초기화하시겠습니까?')) {
+                stats = { total: 0, correct: 0, wrong: 0 };
+                updateStats();
+            }
+        }
+
+        generateProblem();
+    </script>
+</body>
+</html>

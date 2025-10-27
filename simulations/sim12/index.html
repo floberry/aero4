@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>등속원운동 문제 시뮬레이션</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #667eea;
+        }
+        
+        .diagram {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .problem-text {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+            border-left: 4px solid #667eea;
+        }
+        
+        .given-values {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+        
+        .given-values strong {
+            color: #e65100;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            background: #f5f5f5;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .option:hover {
+            background: #e8eaf6;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .option.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+        
+        .option.wrong {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .new-problem-btn {
+            background: #667eea;
+        }
+        
+        .new-problem-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .check-btn {
+            background: #4caf50;
+        }
+        
+        .check-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .check-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            line-height: 1.8;
+            text-align: left;
+        }
+        
+        .feedback.correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+        
+        .feedback.wrong {
+            background: #ffcdd2;
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚛️ 물리학2 등속원운동 문제</h1>
+        
+        <div class="diagram-container">
+            <div class="diagram">
+                <svg viewBox="0 0 600 400">
+                    <line x1="130" y1="230" x2="130" y2="310" stroke="#654321" stroke-width="10"/>
+                    <line x1="470" y1="230" x2="470" y2="310" stroke="#654321" stroke-width="10"/>
+                    <rect x="60" y="230" width="480" height="15" fill="#8b6f47" stroke="#654321" stroke-width="2"/>
+                    <rect x="60" y="60" width="480" height="170" fill="#a0826d" stroke="#654321" stroke-width="3"/>
+                    <ellipse cx="300" cy="145" rx="6" ry="4" fill="#2c2c2c" stroke="#1a1a1a" stroke-width="2"/>
+                    <ellipse id="circle-path" cx="300" cy="145" rx="110" ry="65" fill="none" stroke="#666" stroke-width="2" stroke-dasharray="8,5"/>
+                    
+                    <line id="string-horizontal" x1="410" y1="145" x2="300" y2="145" stroke="#666" stroke-width="3"/>
+                    <line id="string-vertical" x1="300" y1="145" x2="300" y2="320" stroke="#666" stroke-width="3"/>
+                    
+                    <text id="svg-radius" x="345" y="135" fill="#4CAF50" font-size="15" font-weight="bold">0.4m</text>
+                    
+                    <circle id="object-b" cx="410" cy="145" r="16" fill="#4a90e2" stroke="#2e5c8a" stroke-width="3"/>
+                    <text id="label-b" x="420" y="151" font-size="18" font-weight="bold" fill="#333">B</text>
+                    <text id="svg-mass-b" x="425" y="170" font-size="13" fill="#333" font-weight="bold">1kg</text>
+                    <line id="velocity-arrow" x1="410" y1="145" x2="410" y2="100" stroke="#e74c3c" stroke-width="3" marker-end="url(#arrowhead)"/>
+                    <text id="svg-velocity" x="418" y="117" fill="#e74c3c" font-size="14" font-weight="bold">2m/s</text>
+                    
+                    <rect x="282" y="320" width="36" height="36" fill="#7f8c8d" stroke="#5a6268" stroke-width="3" rx="4"/>
+                    <text x="293" y="343" font-size="18" font-weight="bold" fill="#fff">A</text>
+                    
+                    <defs>
+                        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="2.5" orient="auto">
+                            <polygon points="0 0, 7 2.5, 0 5" fill="#e74c3c"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="problem-text">
+            <strong>문제:</strong> 그림과 같이 물체 A와 실로 연결된 물체 B가 마찰이 없는 수평면에서<br>
+            반지름이 <span id="radius-text">0.4m</span>인 원레도를 따라 <span id="velocity-text">2m/s</span>의 속력으로 등속 원운동을<br>
+            한다. B의 질량은 <span id="mass-b-text">1kg</span>이다.<br><br>
+            A의 질량은? (단, 중력 가속도는 10m/s²이고, 물체의 크기, 실의 질량은 무시한다.)
+        </div>
+        
+        <div class="given-values">
+            <strong>주어진 값:</strong><br>
+            • 반지름 r = <span id="radius-value">0.4</span> m<br>
+            • 속력 v = <span id="velocity-value">2</span> m/s<br>
+            • B의 질량 m<sub>B</sub> = <span id="mass-b-value">1</span> kg<br>
+            • 중력 가속도 g = 10 m/s²
+        </div>
+        
+        <div class="options" id="options"></div>
+        
+        <div class="buttons">
+            <button class="new-problem-btn" onclick="generateNewProblem()">🔄 새 문제</button>
+            <button class="check-btn" id="check-btn" onclick="checkAnswer()" disabled>✓ 정답 확인</button>
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <script>
+        let currentAnswer = null;
+        let selectedOption = null;
+        let currentValues = {};
+        
+        function generateNewProblem() {
+            const radii = [0.2, 0.3, 0.4, 0.5, 0.6];
+            const velocities = [1, 1.5, 2, 2.5, 3];
+            const masses = [0.5, 1, 1.5, 2];
+            
+            const r = radii[Math.floor(Math.random() * radii.length)];
+            const v = velocities[Math.floor(Math.random() * velocities.length)];
+            const mB = masses[Math.floor(Math.random() * masses.length)];
+            
+            currentValues = { r, v, mB };
+            const g = 10;
+            currentAnswer = (mB * v * v) / (r * g);
+            
+            document.getElementById('radius-text').textContent = r + 'm';
+            document.getElementById('velocity-text').textContent = v + 'm/s';
+            document.getElementById('mass-b-text').textContent = mB + 'kg';
+            document.getElementById('radius-value').textContent = r;
+            document.getElementById('velocity-value').textContent = v;
+            document.getElementById('mass-b-value').textContent = mB;
+            
+            document.getElementById('svg-radius').textContent = r + 'm';
+            document.getElementById('svg-velocity').textContent = v + 'm/s';
+            document.getElementById('svg-mass-b').textContent = mB + 'kg';
+            
+            const baseRadius = 0.4;
+            const scale = r / baseRadius;
+            const rx = 110 * scale;
+            const ry = 65 * scale;
+            const centerY = 145;
+            const objectX = 300 + rx;
+            
+            // 물체 B의 크기 (질량에 비례, 적절한 크기)
+            const baseMass = 1;
+            const objectRadius = 14 * Math.sqrt(mB / baseMass);
+            
+            document.getElementById('circle-path').setAttribute('rx', rx);
+            document.getElementById('circle-path').setAttribute('ry', ry);
+            document.getElementById('circle-path').setAttribute('cy', centerY);
+            document.getElementById('object-b').setAttribute('cx', objectX);
+            document.getElementById('object-b').setAttribute('cy', centerY);
+            document.getElementById('object-b').setAttribute('r', objectRadius);
+            document.getElementById('label-b').setAttribute('x', objectX + objectRadius + 4);
+            document.getElementById('label-b').setAttribute('y', centerY + 6);
+            document.getElementById('svg-mass-b').setAttribute('x', objectX + objectRadius + 9);
+            document.getElementById('svg-mass-b').setAttribute('y', centerY + 25);
+            
+            // 속도 화살표 (반지름에 따라 각도 조정)
+            // 반지름이 작을수록 타원이 좁아서 접선이 더 기울어짐
+            let arrowAngleDegrees;
+            if (r <= 0.2) arrowAngleDegrees = 50;
+            else if (r <= 0.3) arrowAngleDegrees = 40;
+            else if (r <= 0.4) arrowAngleDegrees = 32;
+            else if (r <= 0.5) arrowAngleDegrees = 27;
+            else arrowAngleDegrees = 22;
+            
+            const arrowLength = 45;
+            const arrowAngle = arrowAngleDegrees * Math.PI / 180;
+            const arrowStartX = objectX;
+            const arrowStartY = centerY - objectRadius;
+            const arrowEndX = arrowStartX - arrowLength * Math.sin(arrowAngle); // 왼쪽으로
+            const arrowEndY = arrowStartY - arrowLength * Math.cos(arrowAngle); // 위쪽으로
+            
+            document.getElementById('velocity-arrow').setAttribute('x1', arrowStartX);
+            document.getElementById('velocity-arrow').setAttribute('y1', arrowStartY);
+            document.getElementById('velocity-arrow').setAttribute('x2', arrowEndX);
+            document.getElementById('velocity-arrow').setAttribute('y2', arrowEndY);
+            document.getElementById('svg-velocity').setAttribute('x', arrowEndX - 15);
+            document.getElementById('svg-velocity').setAttribute('y', arrowEndY + 5);
+            document.getElementById('string-horizontal').setAttribute('x1', objectX);
+            document.getElementById('string-horizontal').setAttribute('y1', centerY);
+            document.getElementById('string-horizontal').setAttribute('y2', centerY);
+            document.getElementById('string-vertical').setAttribute('y1', centerY);
+            document.getElementById('svg-radius').setAttribute('x', 300 + rx / 2 - 20);
+            document.getElementById('svg-radius').setAttribute('y', centerY - 10);
+            
+            generateOptions();
+            
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('feedback').className = 'feedback';
+            selectedOption = null;
+            document.getElementById('check-btn').disabled = true;
+        }
+        
+        function generateOptions() {
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            const correctAnswer = Math.round(currentAnswer * 10) / 10;
+            const options = new Set([correctAnswer]);
+            
+            while (options.size < 5) {
+                let wrong = correctAnswer + (Math.random() - 0.5) * 4;
+                wrong = Math.max(0.5, Math.round(wrong * 10) / 10);
+                options.add(wrong);
+            }
+            
+            const optionsArray = Array.from(options).sort((a, b) => a - b);
+            
+            optionsArray.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = `${String.fromCharCode(9312 + index)} ${option}kg`;
+                div.dataset.value = option;
+                div.onclick = () => selectOption(div, option);
+                optionsDiv.appendChild(div);
+            });
+        }
+        
+        function selectOption(element, value) {
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            selectedOption = value;
+            document.getElementById('check-btn').disabled = false;
+            
+            document.getElementById('feedback').style.display = 'none';
+        }
+        
+        function checkAnswer() {
+            if (selectedOption === null) return;
+            
+            const correctAnswer = Math.round(currentAnswer * 10) / 10;
+            const feedback = document.getElementById('feedback');
+            const tension = currentValues.mB * currentValues.v * currentValues.v / currentValues.r;
+            
+            // 옵션 색상 표시
+            document.querySelectorAll('.option').forEach(opt => {
+                const value = parseFloat(opt.dataset.value);
+                opt.onclick = null;
+                
+                if (Math.abs(value - correctAnswer) < 0.01) {
+                    opt.classList.add('correct');
+                } else if (Math.abs(value - selectedOption) < 0.01) {
+                    opt.classList.add('wrong');
+                }
+            });
+            
+            // 피드백 표시
+            feedback.style.display = 'block';
+            
+            if (Math.abs(selectedOption - correctAnswer) < 0.01) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '🎉 <strong>정답입니다!</strong><br><br>' +
+                    `<strong>📖 해설:</strong><br>` +
+                    `물체 B가 등속 원운동을 하기 위해서는 중심 방향으로 구심력이 필요합니다.<br>` +
+                    `이 구심력은 실의 장력 T가 제공하고, 장력은 추 A의 무게와 같습니다.<br><br>` +
+                    `<strong>✅ 풀이 과정:</strong><br>` +
+                    `① 주어진 값: r = ${currentValues.r}m, v = ${currentValues.v}m/s, m<sub>B</sub> = ${currentValues.mB}kg, g = 10m/s²<br>` +
+                    `② 구심력 공식: F = m<sub>B</sub> × v² / r<br>` +
+                    `③ 구심력 = 장력: T = ${currentValues.mB} × (${currentValues.v})² / ${currentValues.r} = ${currentValues.mB} × ${currentValues.v * currentValues.v} / ${currentValues.r} = ${tension.toFixed(1)}N<br>` +
+                    `④ 장력 = A의 무게: T = m<sub>A</sub> × g<br>` +
+                    `⑤ m<sub>A</sub> = T / g = ${tension.toFixed(1)} / 10 = <strong>${correctAnswer}kg</strong>`;
+            } else {
+                feedback.className = 'feedback wrong';
+                feedback.innerHTML = `❌ <strong>틀렸습니다!</strong><br><br>` +
+                    `<strong>정답:</strong> ${correctAnswer}kg<br><br>` +
+                    `<strong>📖 해설:</strong><br>` +
+                    `물체 B가 등속 원운동을 하려면 중심 방향으로 구심력이 필요합니다.<br>` +
+                    `구심력은 실의 장력이 제공하고, 장력은 추 A의 무게와 같습니다.<br><br>` +
+                    `<strong>✅ 올바른 풀이:</strong><br>` +
+                    `① 주어진 값: r = ${currentValues.r}m, v = ${currentValues.v}m/s, m<sub>B</sub> = ${currentValues.mB}kg, g = 10m/s²<br>` +
+                    `② 구심력 공식: F = m<sub>B</sub> × v² / r<br>` +
+                    `③ 구심력 = 장력: T = ${currentValues.mB} × (${currentValues.v})² / ${currentValues.r} = ${currentValues.mB} × ${currentValues.v * currentValues.v} / ${currentValues.r} = ${tension.toFixed(1)}N<br>` +
+                    `④ 장력 = A의 무게: T = m<sub>A</sub> × g<br>` +
+                    `⑤ m<sub>A</sub> = T / g = ${tension.toFixed(1)} / 10 = <strong>${correctAnswer}kg</strong>`;
+            }
+            
+            document.getElementById('check-btn').disabled = true;
+        }
+        
+        generateNewProblem();
+    </script>
+</body>
+</html>

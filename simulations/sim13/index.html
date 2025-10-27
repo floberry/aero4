@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>돌림힘 문제 연습</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+        }
+        
+        .problem-box {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .problem-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+        }
+        
+        .choices {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .choice-btn {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .choice-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .choice-btn.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        
+        .choice-btn.wrong {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        
+        .choice-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .new-problem-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .new-problem-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+        
+        .feedback {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            border-left: 5px solid #10b981;
+        }
+        
+        .feedback.wrong {
+            background: #fee2e2;
+            border-left: 5px solid #ef4444;
+        }
+        
+        .feedback h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .feedback.correct h3 {
+            color: #059669;
+        }
+        
+        .feedback.wrong h3 {
+            color: #dc2626;
+        }
+        
+        .solution {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            line-height: 1.8;
+        }
+        
+        .formula {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* 사이드바 스타일 */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .concept-section {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #0284c7;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .concept-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0c4a6e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .concept-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .concept-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #0284c7;
+            transition: transform 0.2s;
+        }
+        
+        .concept-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(2, 132, 199, 0.3);
+        }
+        
+        .concept-box h4 {
+            color: #0284c7;
+            font-size: 15px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .concept-box p {
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.5;
+        }
+        
+        .formula-section {
+            background: #fef3c7;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 5px solid #f59e0b;
+        }
+        
+        .formula-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 12px;
+        }
+        
+        .formula-content {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        
+        .formula-item {
+            margin: 8px 0;
+        }
+        
+        .formula-main {
+            font-size: 18px;
+            font-weight: bold;
+            color: #b45309;
+            text-align: center;
+            padding: 8px;
+            background: #fef3c7;
+            border-radius: 5px;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 돌림힘 문제 연습</h1>
+        
+        <div class="main-content">
+            <!-- 문제 영역 -->
+            <div class="problem-area">
+                <div class="problem-box">
+                    <div class="scenario" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #e17055;">
+                        <p style="font-size: 16px; color: #2d3436; line-height: 1.6;">
+                            👧 <strong>소희</strong>가 집에서 자전거를 수리하고 있습니다. 
+                            렌치를 사용하여 너트를 조이려고 하는데, 어느 정도의 돌림힘이 발생하는지 궁금해하고 있어요!
+                        </p>
+                    </div>
+                    <div class="problem-text" id="problemText"></div>
+                    
+                    <div class="diagram">
+                        <svg width="600" height="400" viewBox="0 0 600 400">
+                            <!-- 배경 - 작업대 -->
+                            <rect x="0" y="280" width="600" height="120" fill="#8B7355" opacity="0.3"/>
+                            <rect x="0" y="270" width="600" height="10" fill="#6B5345"/>
+                            
+                            <!-- 자전거 바퀴 (뒷부분) -->
+                            <circle cx="480" cy="240" r="60" fill="none" stroke="#333" stroke-width="8"/>
+                            <circle cx="480" cy="240" r="50" fill="none" stroke="#666" stroke-width="2"/>
+                            <!-- 바퀴 살 -->
+                            <line x1="480" y1="240" x2="530" y2="240" stroke="#666" stroke-width="2"/>
+                            <line x1="480" y1="240" x2="480" y2="180" stroke="#666" stroke-width="2"/>
+                            <line x1="480" y1="240" x2="430" y2="240" stroke="#666" stroke-width="2"/>
+                            <line x1="480" y1="240" x2="480" y2="300" stroke="#666" stroke-width="2"/>
+                            
+                            <!-- 자전거 프레임 -->
+                            <line x1="480" y1="240" x2="380" y2="180" stroke="#2c3e50" stroke-width="6"/>
+                            <line x1="380" y1="180" x2="420" y2="140" stroke="#2c3e50" stroke-width="6"/>
+                            <rect x="410" y="130" width="30" height="15" fill="#e74c3c" rx="3"/>
+                            <text x="415" y="141" fill="white" font-size="10" font-weight="bold">BIKE</text>
+                            
+                            <!-- 툴박스 -->
+                            <rect x="40" y="300" width="80" height="50" fill="#c0392b" stroke="#a93226" stroke-width="2" rx="3"/>
+                            <rect x="40" y="300" width="80" height="12" fill="#e74c3c"/>
+                            <circle cx="80" cy="325" r="3" fill="#333"/>
+                            <rect x="50" y="335" width="15" height="3" fill="#95a5a6"/>
+                            <rect x="70" y="335" width="20" height="3" fill="#95a5a6"/>
+                            
+                            <!-- 소희 캐릭터 -->
+                            <circle cx="280" cy="140" r="25" fill="#ffd7b5" stroke="#333" stroke-width="2"/>
+                            <path d="M 260 125 Q 270 110, 280 108 Q 290 110, 300 125" fill="#4a2c2a" stroke="#333" stroke-width="2"/>
+                            <ellipse cx="275" cy="120" rx="20" ry="15" fill="#4a2c2a"/>
+                            <ellipse cx="255" cy="135" rx="8" ry="20" fill="#4a2c2a" transform="rotate(-20 255 135)"/>
+                            <circle cx="272" cy="140" r="2.5" fill="#333"/>
+                            <circle cx="288" cy="140" r="2.5" fill="#333"/>
+                            <path d="M 275 150 Q 280 152, 285 150" fill="none" stroke="#333" stroke-width="1.5"/>
+                            <circle cx="265" cy="135" r="3" fill="#87ceeb" opacity="0.7"/>
+                            
+                            <rect x="260" y="165" width="40" height="50" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="5"/>
+                            <line x1="270" y1="165" x2="270" y2="180" stroke="#2980b9" stroke-width="1"/>
+                            <line x1="290" y1="165" x2="290" y2="180" stroke="#2980b9" stroke-width="1"/>
+                            
+                            <rect x="300" y="175" width="45" height="12" fill="#ffd7b5" stroke="#333" stroke-width="1.5" rx="6"/>
+                            <ellipse cx="343" cy="181" rx="10" ry="8" fill="#ffd7b5" stroke="#333" stroke-width="1.5"/>
+                            <rect x="230" y="180" width="35" height="10" fill="#ffd7b5" stroke="#333" stroke-width="1.5" rx="5" transform="rotate(-15 230 185)"/>
+                            
+                            <rect x="350" y="160" width="150" height="100" fill="none" stroke="#f39c12" stroke-width="3" stroke-dasharray="5,5" rx="10"/>
+                            <text x="380" y="150" fill="#f39c12" font-size="14" font-weight="bold">작업 중!</text>
+                            
+                            <circle cx="390" cy="210" r="15" fill="#7f8c8d" stroke="#333" stroke-width="2"/>
+                            <path d="M 383 203 L 390 210 L 397 203 M 383 217 L 390 210 L 397 217" stroke="#333" stroke-width="2" fill="none"/>
+                            
+                            <rect x="390" y="205" width="130" height="10" fill="#c0c0c0" stroke="#666" stroke-width="2" rx="2"/>
+                            <rect x="510" y="198" width="20" height="24" fill="#4a5568" stroke="#333" stroke-width="2" rx="3"/>
+                            
+                            <line x1="520" y1="222" x2="520" y2="270" stroke="#e74c3c" stroke-width="5" marker-end="url(#arrowhead)"/>
+                            <text x="528" y="255" fill="#e74c3c" font-size="20" font-weight="bold">F = ?N</text>
+                            
+                            <path d="M 390 185 Q 410 175, 430 185" fill="none" stroke="#9b59b6" stroke-width="3" stroke-dasharray="4,4"/>
+                            <text x="395" y="170" fill="#9b59b6" font-size="14" font-weight="bold">회전!</text>
+                            
+                            <line x1="390" y1="240" x2="520" y2="240" stroke="#e67e22" stroke-width="2"/>
+                            <line x1="390" y1="235" x2="390" y2="245" stroke="#e67e22" stroke-width="2"/>
+                            <line x1="520" y1="235" x2="520" y2="245" stroke="#e67e22" stroke-width="2"/>
+                            <text x="440" y="258" fill="#e67e22" font-size="16" font-weight="bold">L = ?cm</text>
+                            
+                            <ellipse cx="200" cy="100" rx="80" ry="35" fill="white" stroke="#333" stroke-width="2"/>
+                            <path d="M 240 115 L 260 130 L 250 120 Z" fill="white" stroke="#333" stroke-width="2"/>
+                            <text x="145" y="95" fill="#333" font-size="13" font-weight="bold">돌림힘이</text>
+                            <text x="145" y="110" fill="#333" font-size="13" font-weight="bold">얼마일까? 🤔</text>
+                            
+                            <defs>
+                                <marker id="arrowhead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                                    <polygon points="0 0, 12 6, 0 12" fill="#e74c3c"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                    
+                    <div class="choices" id="choices"></div>
+                </div>
+                
+                <div class="feedback" id="feedback"></div>
+                
+                <button class="new-problem-btn" onclick="generateNewProblem()">🔄 새 문제</button>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">풀이 횟수</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="correctCount">0</div>
+                        <div class="stat-label">정답 수</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="accuracy">0%</div>
+                        <div class="stat-label">정답률</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 개념 및 공식 사이드바 (오른쪽) -->
+            <div class="sidebar">
+                <div class="concept-section">
+                    <div class="concept-title">
+                        💡 개념콕콕
+                    </div>
+                    <div class="concept-boxes">
+                        <div class="concept-box">
+                            <h4>🔄 돌림힘(토크, τ)</h4>
+                            <p>물체를 회전축을 중심으로 회전시키려는 효과를 나타내는 물리량입니다. 힘의 크기와 회전축으로부터의 수직거리에 비례합니다.</p>
+                        </div>
+                        <div class="concept-box">
+                            <h4>📏 수직거리(r)</h4>
+                            <p>회전축에서 힘의 작용선까지 수직으로 그은 거리입니다. 같은 힘이라도 거리가 멀수록 돌림힘이 커집니다.</p>
+                        </div>
+                        <div class="concept-box">
+                            <h4>⚖️ 돌림힘의 평형</h4>
+                            <p>시계방향 돌림힘의 합과 반시계방향 돌림힘의 합이 같을 때 물체는 회전하지 않고 평형 상태를 유지합니다.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-section">
+                        <div class="formula-title">📐 필수 공식</div>
+                        <div class="formula-content">
+                            <div class="formula-main">τ = F × r</div>
+                            <div class="formula-item">
+                                • <strong>τ (타우)</strong>: 돌림힘 (N·m)
+                            </div>
+                            <div class="formula-item">
+                                • <strong>F</strong>: 힘의 크기 (N)
+                            </div>
+                            <div class="formula-item">
+                                • <strong>r</strong>: 회전축으로부터의 수직거리 (m)
+                            </div>
+                            <div style="margin-top: 10px; padding: 8px; background: #fef3c7; border-radius: 5px; font-size: 11px;">
+                                ⚠️ <strong>단위 주의:</strong> 거리는 반드시 m(미터) 단위로 변환하세요!<br>
+                                예) 20 cm = 0.2 m
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentProblem = {};
+        let stats = {
+            total: 0,
+            correct: 0
+        };
+        
+        function generateNewProblem() {
+            const lengths = [10, 15, 20, 25, 30, 40, 50];
+            const forces = [5, 8, 10, 12, 15, 20, 25];
+            
+            const length = lengths[Math.floor(Math.random() * lengths.length)];
+            const force = forces[Math.floor(Math.random() * forces.length)];
+            const answer = (length / 100) * force;
+            
+            currentProblem = {
+                length: length,
+                force: force,
+                answer: answer
+            };
+            
+            document.getElementById('problemText').innerHTML = 
+                `다음 그림과 같이 길이 <strong>${length} cm</strong>인 렌치를 이용해 <strong>${force} N</strong>의 힘을 작용하였을 때 너트에 작용하는 돌림힘의 크기는 몇 N·m인가?`;
+            
+            generateChoices(answer);
+            
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').innerHTML = '';
+        }
+        
+        function generateChoices(correctAnswer) {
+            const choices = [];
+            choices.push(correctAnswer);
+            choices.push(correctAnswer * 2);
+            choices.push(correctAnswer * 10);
+            choices.push(correctAnswer * 100);
+            choices.push(correctAnswer / 10);
+            
+            const uniqueChoices = [...new Set(choices)].slice(0, 5);
+            uniqueChoices.sort(() => Math.random() - 0.5);
+            
+            const choicesHtml = uniqueChoices.map((choice, index) => {
+                const displayValue = choice % 1 === 0 ? choice : choice.toFixed(2);
+                return `<button class="choice-btn" onclick="checkAnswer(${choice}, this)">
+                    ① ${displayValue} N·m
+                </button>`;
+            }).join('').replace(/①/g, (match, offset, string) => {
+                const count = (string.substring(0, offset).match(/①/g) || []).length;
+                return ['①', '②', '③', '④', '⑤'][count];
+            });
+            
+            document.getElementById('choices').innerHTML = choicesHtml;
+        }
+        
+        function checkAnswer(selected, button) {
+            const allButtons = document.querySelectorAll('.choice-btn');
+            allButtons.forEach(btn => btn.disabled = true);
+            
+            stats.total++;
+            const isCorrect = Math.abs(selected - currentProblem.answer) < 0.01;
+            
+            if (isCorrect) {
+                stats.correct++;
+                button.classList.add('correct');
+                showFeedback(true);
+            } else {
+                button.classList.add('wrong');
+                allButtons.forEach(btn => {
+                    const value = parseFloat(btn.textContent.match(/[\d.]+/)[0]);
+                    if (Math.abs(value - currentProblem.answer) < 0.01) {
+                        btn.classList.add('correct');
+                    }
+                });
+                showFeedback(false, selected);
+            }
+            
+            updateStats();
+        }
+        
+        function showFeedback(isCorrect, selectedAnswer = null) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = `feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+            
+            const lengthInMeters = currentProblem.length / 100;
+            
+            if (isCorrect) {
+                feedback.innerHTML = `
+                    <h3>✅ 정답입니다!</h3>
+                    <div class="solution">
+                        <p style="color: #e17055; font-weight: bold; margin-bottom: 15px;">
+                            👏 소희가 정확하게 계산했어요!
+                        </p>
+                        <p><strong>📐 풀이 과정:</strong></p>
+                        <div class="formula">
+                            돌림힘(τ) = 힘(F) × 거리(r)
+                        </div>
+                        <p>
+                            • 소희가 사용한 렌치의 길이: ${currentProblem.length} cm = ${lengthInMeters} m<br>
+                            • 소희가 작용한 힘: ${currentProblem.force} N<br>
+                            • 너트에 작용한 돌림힘 = ${currentProblem.force} N × ${lengthInMeters} m = <strong>${currentProblem.answer} N·m</strong>
+                        </p>
+                        <p style="margin-top: 15px; padding: 10px; background: #f0f9ff; border-radius: 5px;">
+                            💡 <strong>핵심 개념:</strong> 돌림힘은 회전축으로부터의 거리가 멀수록, 작용하는 힘이 클수록 커집니다. 소희처럼 단위 변환(cm → m)에 주의하세요!
+                        </p>
+                    </div>
+                `;
+            } else {
+                feedback.innerHTML = `
+                    <h3>❌ 틀렸습니다!</h3>
+                    <div class="solution">
+                        <p style="color: #e17055; font-weight: bold; margin-bottom: 15px;">
+                            😅 소희가 다시 한번 계산해봤어요!
+                        </p>
+                        <p><strong>선택한 답:</strong> ${selectedAnswer} N·m</p>
+                        <p><strong>정답:</strong> ${currentProblem.answer} N·m</p>
+                        
+                        <p style="margin-top: 20px;"><strong>📐 소희의 올바른 풀이:</strong></p>
+                        <div class="formula">
+                            돌림힘(τ) = 힘(F) × 거리(r)
+                        </div>
+                        <p>
+                            <strong>1단계:</strong> 단위 변환<br>
+                            소희가 사용한 렌치의 길이: ${currentProblem.length} cm = ${currentProblem.length} ÷ 100 = ${lengthInMeters} m
+                        </p>
+                        <p>
+                            <strong>2단계:</strong> 돌림힘 계산<br>
+                            τ = F × r<br>
+                            τ = ${currentProblem.force} N × ${lengthInMeters} m<br>
+                            τ = <strong>${currentProblem.answer} N·m</strong>
+                        </p>
+                        <p style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                            ⚠️ <strong>소희의 조언:</strong><br>
+                            ${selectedAnswer > currentProblem.answer ? 
+                                '• 단위를 m로 변환하셨나요? cm를 그대로 사용하면 값이 100배 커져요! 소희도 처음엔 이 실수를 했답니다.' :
+                                '• 돌림힘 = 힘 × 거리 공식을 정확히 적용해야 해요! 소희와 함께 다시 풀어봐요!'}
+                        </p>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('correctCount').textContent = stats.correct;
+            const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+        
+        generateNewProblem();
+    </script>
+</body>
+</html>

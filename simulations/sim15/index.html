@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>토크 탈출 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+        }
+        
+        .stage-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stage-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+        }
+        
+        .stage-dot.active {
+            background: #667eea;
+            transform: scale(1.3);
+        }
+        
+        .stage-dot.completed {
+            background: #10b981;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .stage-title {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .problem-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .wrench-diagram {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .wrench-svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .problem-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .answer-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        input[type="number"] {
+            width: 120px;
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .submit-btn {
+            background: #667eea;
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .new-problem-btn {
+            background: #10b981;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .new-problem-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        
+        .feedback.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .correct-mark {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.5);
+        }
+        
+        .correct-mark::after {
+            content: '✓';
+            color: white;
+            font-size: 80px;
+            font-weight: bold;
+        }
+        
+        .wrong-mark {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(239, 68, 68, 0.5);
+        }
+        
+        .wrong-mark::after {
+            content: '✗';
+            color: white;
+            font-size: 80px;
+            font-weight: bold;
+        }
+        
+        .answer-feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+            text-align: left;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .answer-feedback.show {
+            display: block;
+        }
+        
+        .answer-feedback h3 {
+            color: #ef4444;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .solution-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .solution-section h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .solution-section p {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        
+        .formula {
+            background: white;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .step {
+            background: #e0e7ff;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .final-answer {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        .close-feedback {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto 0;
+            font-weight: bold;
+        }
+        
+        .close-feedback:hover {
+            background: #5568d3;
+        }
+        
+        .key-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .key-scene.show {
+            display: flex;
+        }
+        
+        .key-message {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .key-message h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        .key-message p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .golden-key {
+            font-size: 120px;
+            animation: keyFloat 3s ease-in-out infinite, keyRotate 4s linear infinite;
+            cursor: pointer;
+            transition: transform 0.3s;
+            filter: drop-shadow(0 10px 30px rgba(251, 191, 36, 0.6));
+        }
+        
+        .golden-key:hover {
+            transform: scale(1.2);
+        }
+        
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
+            50% { text-shadow: 0 0 40px rgba(251, 191, 36, 1), 0 0 60px rgba(251, 191, 36, 0.8); }
+        }
+        
+        @keyframes keyFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+        
+        @keyframes keyRotate {
+            0% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+            100% { transform: rotate(-10deg); }
+        }
+        
+        .instruction-text {
+            color: white;
+            font-size: 18px;
+            margin-top: 30px;
+            opacity: 0.8;
+            animation: blink 2s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.3; }
+        }
+        
+        .escape-success {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 60px 80px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            text-align: center;
+            z-index: 4000;
+            transition: transform 0.5s ease;
+        }
+        
+        .escape-success.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .escape-success h1 {
+            font-size: 48px;
+            color: #10b981;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+        
+        .escape-success p {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .restart-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .restart-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .instruction-text {
+            color: white;
+            font-size: 18px;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="stage-indicator">
+            <div class="stage-dot active" id="dot1"></div>
+            <div class="stage-dot" id="dot2"></div>
+            <div class="stage-dot" id="dot3"></div>
+        </div>
+        
+        <h1>🔧 토크 탈출 게임 🔧</h1>
+        <div class="stage-title" id="stageTitle">1단계: 기초 탈출</div>
+        
+        <div class="problem-area">
+            <div class="problem-text" id="problemText"></div>
+            
+            <div class="wrench-diagram">
+                <svg class="wrench-svg" viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Arrow marker for force -->
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#e74c3c"/>
+                        </marker>
+                        
+                        <!-- Gradient for wrench -->
+                        <linearGradient id="wrenchGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#b8b8b8;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#888888;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#666666;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- Main wrench body with realistic shape -->
+                    <g id="wrench">
+                        <!-- Handle -->
+                        <rect x="60" y="90" width="280" height="25" rx="3" fill="url(#wrenchGradient)" stroke="#444" stroke-width="2"/>
+                        
+                        <!-- Handle grip lines -->
+                        <line x1="100" y1="90" x2="100" y2="115" stroke="#555" stroke-width="1"/>
+                        <line x1="130" y1="90" x2="130" y2="115" stroke="#555" stroke-width="1"/>
+                        <line x1="160" y1="90" x2="160" y2="115" stroke="#555" stroke-width="1"/>
+                        <line x1="190" y1="90" x2="190" y2="115" stroke="#555" stroke-width="1"/>
+                        
+                        <!-- Adjustable head -->
+                        <path d="M 340 75 L 390 75 L 405 85 L 410 102.5 L 405 120 L 390 130 L 340 130 Z" 
+                              fill="url(#wrenchGradient)" stroke="#444" stroke-width="2"/>
+                        
+                        <!-- Bolt/nut in wrench head -->
+                        <polygon points="380,90 390,95 390,110 380,115 370,110 370,95" 
+                                 fill="#ddd" stroke="#999" stroke-width="1.5"/>
+                        
+                        <!-- Rotation center bolt -->
+                        <circle cx="80" cy="102.5" r="12" fill="#444" stroke="#222" stroke-width="2"/>
+                        <circle cx="80" cy="102.5" r="6" fill="#666"/>
+                    </g>
+                    
+                    <!-- Rotation axis label -->
+                    <text x="80" y="150" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">O</text>
+                    
+                    <!-- Vertical dashed line from O -->
+                    <line x1="80" y1="50" x2="80" y2="90" stroke="#666" stroke-width="1.5" stroke-dasharray="5,3"/>
+                    
+                    <!-- Horizontal distance line -->
+                    <line x1="80" y1="50" x2="380" y2="50" stroke="#666" stroke-width="2" stroke-dasharray="8,4"/>
+                    <line x1="80" y1="45" x2="80" y2="55" stroke="#666" stroke-width="2"/>
+                    <line x1="380" y1="45" x2="380" y2="55" stroke="#666" stroke-width="2"/>
+                    
+                    <!-- Distance label -->
+                    <rect x="210" y="28" width="80" height="30" fill="white" stroke="#667eea" stroke-width="2" rx="5"/>
+                    <text x="250" y="48" text-anchor="middle" font-size="18" font-weight="bold" fill="#667eea" id="distanceText">20 cm</text>
+                    
+                    <!-- Force vector arrow -->
+                    <g id="forceVector">
+                        <line x1="380" y1="102.5" x2="460" y2="50" stroke="#e74c3c" stroke-width="4" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Force label with background -->
+                        <rect x="440" y="25" width="65" height="28" fill="#e74c3c" rx="5"/>
+                        <text x="472" y="45" text-anchor="middle" font-size="16" font-weight="bold" fill="white" id="forceText">F=10N</text>
+                    </g>
+                    
+                    <!-- Angle arc -->
+                    <path d="M 430 102.5 Q 425 90, 415 77" stroke="#f39c12" stroke-width="2.5" fill="none"/>
+                    
+                    <!-- Angle label with background -->
+                    <circle cx="418" cy="85" r="18" fill="#f39c12" opacity="0.9"/>
+                    <text x="418" y="92" text-anchor="middle" font-size="16" font-weight="bold" fill="white" id="angleText">30°</text>
+                    
+                    <!-- Horizontal reference line (dashed) -->
+                    <line x1="380" y1="102.5" x2="470" y2="102.5" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3"/>
+                </svg>
+            </div>
+            
+            <div class="answer-section">
+                <input type="number" id="answerInput" placeholder="답 입력" step="0.1">
+                <span style="font-size: 18px; font-weight: bold;">N·m</span>
+                <button class="submit-btn" onclick="checkAnswer()">제출</button>
+                <button class="new-problem-btn" onclick="newProblem()">새 문제</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+    <div class="answer-feedback" id="answerFeedback">
+        <h3>❌ 오답입니다!</h3>
+        
+        <div class="solution-section">
+            <h4>📚 토크(돌림힘) 공식</h4>
+            <div class="formula">
+                τ (토크) = F × r × sin(θ)
+            </div>
+            <p><strong>τ (타우)</strong>: 토크 (N·m)</p>
+            <p><strong>F</strong>: 힘의 크기 (N)</p>
+            <p><strong>r</strong>: 회전축으로부터의 거리 (m)</p>
+            <p><strong>θ (세타)</strong>: 힘과 렌치 사이의 각도</p>
+        </div>
+        
+        <div class="solution-section">
+            <h4>🔍 이 문제의 풀이</h4>
+            <div id="solutionSteps"></div>
+        </div>
+        
+        <div class="final-answer" id="finalAnswerBox"></div>
+        
+        <button class="close-feedback" onclick="closeFeedback()">확인하고 다시 도전!</button>
+    </div>
+    
+    <div class="key-scene" id="keyScene">
+        <div class="key-message">
+            <h1>🎉 모든 단계 클리어! 🎉</h1>
+            <p>황금 열쇠를 획득했습니다!</p>
+        </div>
+        <div class="golden-key" onclick="unlockAndEscape()">🔑</div>
+        <p class="instruction-text">열쇠를 클릭하여 탈출하세요!</p>
+    </div>
+    
+    <div class="escape-success" id="escapeSuccess">
+        <h1>🎊 탈출 성공! 🎊</h1>
+        <p>축하합니다! 모든 토크 문제를 풀고<br>감옥에서 탈출했습니다!</p>
+        <button class="restart-btn" onclick="restartGame()">처음부터 다시하기</button>
+    </div>
+
+    <script>
+        let currentStage = 1;
+        let currentDistance, currentForce, currentAngle, correctAnswer;
+        
+        const stageTitles = [
+            "1단계: 기초 탈출",
+            "2단계: 중급 탈출",
+            "3단계: 최종 탈출"
+        ];
+        
+        function generateProblem() {
+            currentDistance = Math.floor(Math.random() * 8 + 3) * 5; // 15-55 cm
+            currentForce = Math.floor(Math.random() * 8 + 2) * 5; // 10-50 N
+            currentAngle = [30, 45, 60][Math.floor(Math.random() * 3)];
+            
+            const distanceM = currentDistance / 100;
+            const angleRad = currentAngle * Math.PI / 180;
+            correctAnswer = Math.round(currentForce * distanceM * Math.sin(angleRad) * 10) / 10;
+            
+            document.getElementById('problemText').innerHTML = 
+                `다음 그림과 같이 길이 ${currentDistance} cm인 렌치를 이용해 ${currentForce} N의 힘을 작용하였을 때 너트에 작용하는 돌림힘의 크기는 몇 N·m인가?`;
+            
+            document.getElementById('distanceText').textContent = currentDistance + ' cm';
+            document.getElementById('forceText').textContent = 'F=' + currentForce + 'N';
+            document.getElementById('angleText').textContent = currentAngle + '°';
+            document.getElementById('answerInput').value = '';
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('answerInput').value);
+            
+            if (isNaN(userAnswer)) {
+                alert('답을 입력해주세요!');
+                return;
+            }
+            
+            const feedback = document.getElementById('feedback');
+            
+            if (Math.abs(userAnswer - correctAnswer) < 0.1) {
+                feedback.innerHTML = '<div class="correct-mark"></div>';
+                feedback.classList.add('show');
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                    if (currentStage < 3) {
+                        currentStage++;
+                        updateStage();
+                        generateProblem();
+                    } else {
+                        showKeyScene();
+                    }
+                }, 1500);
+            } else {
+                feedback.innerHTML = '<div class="wrong-mark"></div>';
+                feedback.classList.add('show');
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                    showAnswerFeedback();
+                }, 1000);
+            }
+        }
+        
+        function showAnswerFeedback() {
+            const distanceM = currentDistance / 100;
+            const angleRad = currentAngle * Math.PI / 180;
+            const sinValue = Math.sin(angleRad).toFixed(4);
+            
+            // sin 값의 일반적인 표현
+            let sinDisplay = sinValue;
+            if (currentAngle === 30) sinDisplay = "0.5";
+            if (currentAngle === 45) sinDisplay = "√2/2 ≈ 0.7071";
+            if (currentAngle === 60) sinDisplay = "√3/2 ≈ 0.8660";
+            
+            let stepsHTML = `
+                <div class="step">
+                    <strong>📌 1단계: 문제 이해하기</strong><br>
+                    • 이 문제는 <strong>토크(돌림힘)</strong>를 구하는 문제입니다<br>
+                    • 토크는 물체를 회전시키려는 힘의 효과를 나타냅니다<br>
+                    • 회전축(O)으로부터 떨어진 곳에 힘을 가할수록 회전 효과가 커집니다
+                </div>
+                
+                <div class="step">
+                    <strong>📋 2단계: 주어진 값 정리</strong><br>
+                    • 힘의 크기 (F) = ${currentForce} N<br>
+                    • 회전축부터 힘이 작용하는 점까지의 거리 (r) = ${currentDistance} cm<br>
+                    • 힘의 방향과 렌치가 이루는 각도 (θ) = ${currentAngle}°<br>
+                    <br>
+                    ⚠️ <strong>중요!</strong> 거리의 단위가 cm이므로 m로 바꿔야 합니다!
+                </div>
+                
+                <div class="step">
+                    <strong>🔄 3단계: 단위 변환 (cm → m)</strong><br>
+                    • 토크의 단위는 N·m이므로 거리를 m로 변환해야 합니다<br>
+                    • ${currentDistance} cm = ${currentDistance} ÷ 100 = <strong>${distanceM} m</strong><br>
+                    <br>
+                    💡 Tip: 1 m = 100 cm이므로, cm를 m로 바꾸려면 100으로 나눕니다
+                </div>
+                
+                <div class="step">
+                    <strong>📐 4단계: 토크 공식 이해하기</strong><br>
+                    • 토크 공식: <strong>τ = r × F × sin(θ)</strong><br>
+                    • r: 회전축으로부터의 거리 (m)<br>
+                    • F: 힘의 크기 (N)<br>
+                    • sin(θ): 각도의 사인 값<br>
+                    <br>
+                    ❓ <strong>왜 sin(θ)를 곱할까?</strong><br>
+                    힘이 렌치에 수직으로 작용할 때 회전 효과가 가장 큽니다.<br>
+                    비스듬하게 작용하면 수직 성분만 회전에 기여하므로 sin(θ)를 곱합니다.
+                </div>
+                
+                <div class="step">
+                    <strong>🧮 5단계: sin 값 계산</strong><br>
+                    • sin(${currentAngle}°) = ${sinDisplay}<br>
+                    <br>
+                    💡 계산기 사용법:<br>
+                    1) 계산기를 'DEG' 모드로 설정<br>
+                    2) ${currentAngle}을 입력 후 sin 버튼<br>
+                    <br>
+                    📝 외워두면 좋은 값:<br>
+                    • sin(30°) = 0.5<br>
+                    • sin(45°) = √2/2 ≈ 0.7071<br>
+                    • sin(60°) = √3/2 ≈ 0.8660
+                </div>
+                
+                <div class="step">
+                    <strong>✏️ 6단계: 공식에 값 대입</strong><br>
+                    • τ = r × F × sin(θ)<br>
+                    • τ = ${distanceM} m × ${currentForce} N × ${sinValue}<br>
+                    <br>
+                    순서대로 곱하면:<br>
+                    • ${distanceM} × ${currentForce} = ${(distanceM * currentForce).toFixed(2)}<br>
+                    • ${(distanceM * currentForce).toFixed(2)} × ${sinValue} = <strong>${correctAnswer}</strong>
+                </div>
+                
+                <div class="step">
+                    <strong>✅ 7단계: 최종 답 작성</strong><br>
+                    • 계산 결과: ${correctAnswer}<br>
+                    • 단위 붙이기: ${correctAnswer} <strong>N·m</strong><br>
+                    <br>
+                    ⚠️ 단위를 꼭 확인하세요!<br>
+                    토크의 단위는 항상 N·m (뉴턴·미터) 입니다.
+                </div>
+            `;
+            
+            document.getElementById('solutionSteps').innerHTML = stepsHTML;
+            document.getElementById('finalAnswerBox').innerHTML = `
+                🎯 정답: <span style="font-size: 24px">${correctAnswer} N·m</span><br>
+                <span style="font-size: 14px; font-weight: normal; opacity: 0.9;">
+                다시 한번 풀어보세요!
+                </span>
+            `;
+            document.getElementById('answerFeedback').classList.add('show');
+        }
+        
+        function closeFeedback() {
+            document.getElementById('answerFeedback').classList.remove('show');
+        }
+        
+        function newProblem() {
+            generateProblem();
+        }
+        
+        function updateStage() {
+            document.getElementById('stageTitle').textContent = stageTitles[currentStage - 1];
+            
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById('dot' + i);
+                dot.classList.remove('active', 'completed');
+                if (i < currentStage) {
+                    dot.classList.add('completed');
+                } else if (i === currentStage) {
+                    dot.classList.add('active');
+                }
+            }
+        }
+        
+        function showKeyScene() {
+            document.getElementById('keyScene').classList.add('show');
+        }
+        
+        function unlockAndEscape() {
+            document.getElementById('keyScene').classList.remove('show');
+            document.getElementById('escapeSuccess').classList.add('show');
+            
+            // 폭죽 효과 추가
+            createFireworks();
+        }
+        
+        function createFireworks() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a29bfe'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.textContent = '✨';
+                    firework.style.position = 'fixed';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                    firework.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    firework.style.animation = 'fadeOut 2s ease-out';
+                    firework.style.zIndex = '5000';
+                    firework.style.pointerEvents = 'none';
+                    document.body.appendChild(firework);
+                    
+                    setTimeout(() => firework.remove(), 2000);
+                }, i * 100);
+            }
+        }
+        
+        function restartGame() {
+            currentStage = 1;
+            updateStage();
+            generateProblem();
+            document.getElementById('escapeSuccess').classList.remove('show');
+        }
+        
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        generateProblem();
+    </script>
+</body>
+</html>
