@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>돌림힘 평형 시뮬레이션</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .problem-area {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #667eea;
+        }
+        
+        .problem-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .canvas-area {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .input-area {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-new {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-new:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-check {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-check:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-solution {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-solution:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #48bb78;
+            display: block;
+        }
+        
+        .feedback.incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #f56565;
+            display: block;
+        }
+        
+        .feedback.solution {
+            background: #fef5e7;
+            color: #7d6608;
+            border: 2px solid #f39c12;
+            display: block;
+            text-align: left;
+        }
+        
+        .solution-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .hint {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 돌림힘 평형 문제 연습</h1>
+        
+        <div class="problem-area">
+            <div class="problem-text" id="problemText"></div>
+            
+            <div class="canvas-area">
+                <canvas id="balanceCanvas" width="700" height="250"></canvas>
+            </div>
+            
+            <div class="hint">
+                💡 힌트: 평형 상태에서 회전축을 중심으로 시계 방향 돌림힘과 반시계 방향 돌림힘이 같습니다. (돌림힘 = 힘 × 거리)
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="input-group">
+                <label for="answerInput">물체 A의 무게 (N):</label>
+                <input type="number" id="answerInput" step="0.1" placeholder="답을 입력하세요">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-new" onclick="generateNewProblem()">🔄 새 문제</button>
+                <button class="btn-check" onclick="checkAnswer()">✓ 정답 확인</button>
+                <button class="btn-solution" onclick="showSolution()">📖 해설 보기</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        
+        function generateNewProblem() {
+            // 랜덤 값 생성
+            const rodLength = 100; // 1m = 100cm
+            const pivotPos = 50; // 중앙 = 50cm
+            
+            // A의 위치 (10cm ~ 40cm)
+            const posA = Math.floor(Math.random() * 31) + 10;
+            
+            // B의 위치 (60cm ~ 90cm)
+            const posB = Math.floor(Math.random() * 31) + 60;
+            
+            // B의 무게 (10N ~ 50N, 5N 단위)
+            const weightB = (Math.floor(Math.random() * 9) + 2) * 5;
+            
+            // A의 무게 계산 (평형 조건)
+            const distanceA = Math.abs(pivotPos - posA);
+            const distanceB = Math.abs(posB - pivotPos);
+            const weightA = (weightB * distanceB) / distanceA;
+            
+            currentProblem = {
+                posA: posA,
+                posB: posB,
+                weightB: weightB,
+                weightA: weightA,
+                distanceA: distanceA,
+                distanceB: distanceB
+            };
+            
+            // 문제 텍스트 업데이트
+            document.getElementById('problemText').innerHTML = `
+                <strong>문제:</strong> 길이 100 cm인 자의 중앙(50 cm)을 실로 매단 후, 
+                물체 A를 자의 눈금 <span style="color: #e74c3c; font-weight: bold;">${posA} cm</span> 되는 곳에 매달고, 
+                무게 <span style="color: #3498db; font-weight: bold;">${weightB} N</span>인 물체 B를 눈금 
+                <span style="color: #3498db; font-weight: bold;">${posB} cm</span> 되는 곳에 매달았더니 
+                돌림힘이 평형을 이루게 되었다.<br><br>
+                <strong>물체 A의 무게는 몇 N인가?</strong>
+            `;
+            
+            // 캔버스 그리기
+            drawBalance();
+            
+            // 입력 및 피드백 초기화
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('feedback').className = 'feedback';
+        }
+        
+        function drawBalance() {
+            const canvas = document.getElementById('balanceCanvas');
+            const ctx = canvas.getContext('2d');
+            const scale = 6; // 1cm = 6px
+            
+            // 캔버스 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 받침대 그리기
+            const pivotX = 350;
+            const pivotY = 100;
+            
+            ctx.fillStyle = '#34495e';
+            ctx.beginPath();
+            ctx.moveTo(pivotX - 20, pivotY);
+            ctx.lineTo(pivotX + 20, pivotY);
+            ctx.lineTo(pivotX, pivotY + 30);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 막대 그리기
+            const rodStartX = pivotX - 300;
+            const rodEndX = pivotX + 300;
+            const rodY = pivotY - 5;
+            
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(rodStartX, rodY);
+            ctx.lineTo(rodEndX, rodY);
+            ctx.stroke();
+            
+            // 눈금 표시
+            for (let i = 0; i <= 100; i += 10) {
+                const x = rodStartX + i * scale;
+                ctx.strokeStyle = '#95a5a6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, rodY - 10);
+                ctx.lineTo(x, rodY + 10);
+                ctx.stroke();
+                
+                if (i % 20 === 0) {
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(i, x, rodY + 25);
+                }
+            }
+            
+            // 물체 A 그리기
+            const xA = rodStartX + currentProblem.posA * scale;
+            
+            // 줄
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(xA, rodY);
+            ctx.lineTo(xA, rodY + 60);
+            ctx.stroke();
+            
+            // 물체
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(xA - 20, rodY + 60, 40, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('A', xA, rodY + 85);
+            
+            // 물체 B 그리기
+            const xB = rodStartX + currentProblem.posB * scale;
+            
+            // 줄
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(xB, rodY);
+            ctx.lineTo(xB, rodY + 60);
+            ctx.stroke();
+            
+            // 물체
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(xB - 20, rodY + 60, 40, 40);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('B', xB, rodY + 85);
+            
+            // 무게 표시
+            ctx.fillStyle = '#3498db';
+            ctx.font = '14px Arial';
+            ctx.fillText(currentProblem.weightB + ' N', xB, rodY + 120);
+            
+            // 거리 표시
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            // A의 거리
+            ctx.beginPath();
+            ctx.moveTo(xA, rodY - 30);
+            ctx.lineTo(pivotX, rodY - 30);
+            ctx.stroke();
+            ctx.fillStyle = '#27ae60';
+            ctx.font = '12px Arial';
+            ctx.fillText(currentProblem.distanceA + ' cm', (xA + pivotX) / 2, rodY - 35);
+            
+            // B의 거리
+            ctx.beginPath();
+            ctx.moveTo(pivotX, rodY - 30);
+            ctx.lineTo(xB, rodY - 30);
+            ctx.stroke();
+            ctx.fillText(currentProblem.distanceB + ' cm', (pivotX + xB) / 2, rodY - 35);
+            
+            ctx.setLineDash([]);
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('answerInput').value);
+            const feedback = document.getElementById('feedback');
+            
+            if (isNaN(userAnswer)) {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = '⚠️ 답을 입력해주세요!';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            const correctAnswer = currentProblem.weightA;
+            const tolerance = 0.1; // 오차 범위 (소수점 첫째자리까지 정확해야 함)
+            
+            if (Math.abs(userAnswer - correctAnswer) < tolerance) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    🎉 정답입니다!<br>
+                    물체 A의 무게: ${correctAnswer.toFixed(1)} N<br>
+                    <small>돌림힘 평형: ${currentProblem.weightA.toFixed(1)} N × ${currentProblem.distanceA} cm = 
+                    ${currentProblem.weightB} N × ${currentProblem.distanceB} cm</small>
+                `;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    ❌ 틀렸습니다. 다시 시도해보세요!<br>
+                    <small>힌트: 돌림힘의 평형 조건을 이용하세요.<br>
+                    왼쪽 돌림힘 = 오른쪽 돌림힘<br><br>
+                    정답과 해설을 보려면 "📖 해설 보기" 버튼을 클릭하세요.</small>
+                `;
+            }
+            feedback.style.display = 'block';
+        }
+        
+        function showSolution() {
+            const feedback = document.getElementById('feedback');
+            const torqueA = currentProblem.weightA * currentProblem.distanceA;
+            const torqueB = currentProblem.weightB * currentProblem.distanceB;
+            
+            feedback.className = 'feedback solution';
+            feedback.innerHTML = `
+                <div style="text-align: center; font-size: 18px; margin-bottom: 15px;">
+                    <strong>📖 문제 해설</strong>
+                </div>
+                
+                <div class="solution-step">
+                    <strong>1️⃣ 주어진 조건</strong><br>
+                    • 막대의 길이: 100 cm<br>
+                    • 받침점(회전축): 50 cm (중앙)<br>
+                    • 물체 A의 위치: ${currentProblem.posA} cm<br>
+                    • 물체 B의 위치: ${currentProblem.posB} cm<br>
+                    • 물체 B의 무게: ${currentProblem.weightB} N
+                </div>
+                
+                <div class="solution-step">
+                    <strong>2️⃣ 받침점으로부터의 거리 계산</strong><br>
+                    • 물체 A까지의 거리: |50 - ${currentProblem.posA}| = ${currentProblem.distanceA} cm<br>
+                    • 물체 B까지의 거리: |${currentProblem.posB} - 50| = ${currentProblem.distanceB} cm
+                </div>
+                
+                <div class="solution-step">
+                    <strong>3️⃣ 돌림힘 평형 조건 적용</strong><br>
+                    평형 상태에서는 시계 방향 돌림힘과 반시계 방향 돌림힘이 같습니다.<br><br>
+                    <span style="color: #e74c3c;">W<sub>A</sub> × d<sub>A</sub></span> = 
+                    <span style="color: #3498db;">W<sub>B</sub> × d<sub>B</sub></span><br><br>
+                    <span style="color: #e74c3c;">W<sub>A</sub> × ${currentProblem.distanceA}</span> = 
+                    <span style="color: #3498db;">${currentProblem.weightB} × ${currentProblem.distanceB}</span>
+                </div>
+                
+                <div class="solution-step">
+                    <strong>4️⃣ 물체 A의 무게 계산</strong><br>
+                    W<sub>A</sub> = (${currentProblem.weightB} × ${currentProblem.distanceB}) ÷ ${currentProblem.distanceA}<br>
+                    W<sub>A</sub> = ${torqueB} ÷ ${currentProblem.distanceA}<br>
+                    W<sub>A</sub> = <strong style="color: #e74c3c; font-size: 20px;">${currentProblem.weightA.toFixed(1)} N</strong>
+                </div>
+                
+                <div class="solution-step">
+                    <strong>5️⃣ 검산</strong><br>
+                    좌측 돌림힘: ${currentProblem.weightA.toFixed(1)} N × ${currentProblem.distanceA} cm = ${torqueA.toFixed(1)} N·cm<br>
+                    우측 돌림힘: ${currentProblem.weightB} N × ${currentProblem.distanceB} cm = ${torqueB.toFixed(1)} N·cm<br>
+                    ✓ 두 돌림힘이 같으므로 평형 상태입니다!
+                </div>
+            `;
+            feedback.style.display = 'block';
+        }
+        
+        // Enter 키로 정답 확인
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // 페이지 로드 시 첫 문제 생성
+        generateNewProblem();
+    </script>
+</body>
+</html>

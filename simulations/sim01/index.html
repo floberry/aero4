@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>놀이공원 회전 놀이기구 설계</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '🎪🎡🎠🎢🎨';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.05;
+            animation: float 20s infinite;
+            top: 10%;
+            left: 10%;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+        }
+        
+        h1 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .problem-section {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #f5576c;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.1);
+        }
+        
+        .problem-text {
+            line-height: 1.8;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .value {
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            background: linear-gradient(180deg, #87ceeb 0%, #98d8e8 50%, #7cb342 100%);
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        canvas {
+            border: 2px solid #f5576c;
+            border-radius: 10px;
+        }
+        
+        .input-section {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        label {
+            font-weight: bold;
+            color: #333;
+            min-width: 200px;
+        }
+        
+        input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #f5576c;
+            box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+        }
+        
+        .unit {
+            color: #666;
+            font-weight: bold;
+            min-width: 60px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        button {
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .new-problem-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .check-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .feedback.hidden {
+            display: none;
+        }
+        
+        .solution {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .solution.hidden {
+            display: none;
+        }
+        
+        .solution h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .solution-step {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎡 드림랜드 회전 놀이기구 설계소</h1>
+        <div class="subtitle">안전한 놀이기구를 위한 물리학 엔지니어링</div>
+        
+        <div class="problem-section">
+            <div class="problem-text" id="problemText"></div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="simulationCanvas" width="500" height="400"></canvas>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label>균형추(바구니) 질량:</label>
+                <input type="number" id="massInput" step="0.1" placeholder="답을 입력하세요">
+                <span class="unit">kg</span>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="new-problem-btn" id="newProblemBtn">🎢 새로운 설계</button>
+            <button class="check-btn" id="checkBtn">✓ 안전성 검사</button>
+        </div>
+        
+        <div class="feedback hidden" id="feedback"></div>
+        <div class="solution hidden" id="solution"></div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        let animationId = null;
+        let angle = 0;
+        const g = 10;
+
+        document.getElementById('newProblemBtn').addEventListener('click', generateNewProblem);
+        document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+
+        function generateNewProblem() {
+            // 답이 자연수가 되도록 역산하여 생성
+            const basket = Math.floor(Math.random() * 5 + 1); // 1~5 kg (답)
+            const radius = 1; // 1 m (고정)
+            const velocity = Math.floor(Math.random() * 4 + 2); // 2~5 m/s
+            
+            // 역으로 곤돌라 질량 계산: m_gondola = (m_basket × r × g) / v²
+            const gondola = Math.round((basket * radius * g) / Math.pow(velocity, 2));
+            
+            currentProblem = {
+                gondola: gondola,
+                radius: radius,
+                velocity: velocity,
+                basket: basket
+            };
+            
+            currentProblem.tension = currentProblem.basket * g;
+            
+            document.getElementById('problemText').innerHTML = `
+                <strong>설계 의뢰서:</strong><br>
+                드림랜드 놀이공원에서 신형 회전 놀이기구 "스카이 라운드"를 설계 중입니다. 
+                승객이 탑승한 곤돌라(질량 <span class="value">${currentProblem.gondola} kg</span>)가 
+                매끄러운 회전판 위에서 반지름 <span class="value">${currentProblem.radius} m</span>의 원을 그리며 
+                <span class="value">${currentProblem.velocity} m/s</span>의 일정한 속력으로 회전합니다.<br><br>
+                곤돌라는 회전판 중앙의 구멍을 통과하는 케이블로 연결되어 있으며, 
+                케이블 아래쪽에는 균형을 맞추기 위한 바구니(균형추)가 매달려 정지해 있습니다.<br><br>
+                <strong>엔지니어링 과제:</strong> 안전한 운행을 위해 필요한 균형추(바구니)의 질량을 계산하세요! 🎯
+            `;
+            
+            document.getElementById('massInput').value = '';
+            document.getElementById('feedback').className = 'feedback hidden';
+            document.getElementById('solution').className = 'solution hidden';
+            
+            startAnimation();
+        }
+        
+        function checkAnswer() {
+            const massInput = parseFloat(document.getElementById('massInput').value);
+            const feedback = document.getElementById('feedback');
+            const solution = document.getElementById('solution');
+            
+            if (isNaN(massInput) || massInput <= 0) {
+                alert('올바른 질량 값을 입력해주세요!');
+                return;
+            }
+            
+            const massError = Math.abs(massInput - currentProblem.basket) / currentProblem.basket;
+            
+            if (massError < 0.01) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = '🎉 안전 검사 통과! 완벽한 설계입니다!';
+                
+                solution.className = 'solution';
+                solution.innerHTML = `
+                    <h3>📝 설계 계산서</h3>
+                    <div class="solution-step">
+                        <strong>1. 곤돌라에 작용하는 구심력 분석:</strong><br>
+                        곤돌라가 원운동을 하려면 구심력이 필요합니다.<br>
+                        구심력 F = m(곤돌라) × v² / r = ${currentProblem.gondola} × (${currentProblem.velocity})² / ${currentProblem.radius}<br>
+                        F = ${currentProblem.gondola} × ${(currentProblem.velocity * currentProblem.velocity).toFixed(2)} / ${currentProblem.radius}<br>
+                        F = ${currentProblem.tension.toFixed(2)} N
+                    </div>
+                    <div class="solution-step">
+                        <strong>2. 균형추(바구니)의 힘 평형 상태:</strong><br>
+                        바구니는 정지 상태이므로 힘이 평형을 이룹니다.<br>
+                        케이블 장력 T = m(바구니) × g<br>
+                        케이블의 장력은 같으므로: m(곤돌라) × v² / r = m(바구니) × g
+                    </div>
+                    <div class="solution-step">
+                        <strong>3. 균형추(바구니) 질량 계산:</strong><br>
+                        m(바구니) = (m(곤돌라) × v²) / (r × g)<br>
+                        m(바구니) = (${currentProblem.gondola} × ${(currentProblem.velocity * currentProblem.velocity).toFixed(2)}) / (${currentProblem.radius} × ${g})<br>
+                        m(바구니) = ${(currentProblem.gondola * currentProblem.velocity * currentProblem.velocity).toFixed(2)} / ${(currentProblem.radius * g).toFixed(1)}<br>
+                        <strong>m(바구니) = ${currentProblem.basket.toFixed(2)} kg</strong>
+                    </div>
+                    <div class="solution-step" style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                        <strong>✅ 안전 확인:</strong> 이 질량의 균형추를 사용하면 곤돌라가 안정적으로 회전합니다!
+                    </div>
+                `;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = '❌ 계산을 다시 확인해주세요!<br>힌트: 구심력(m·v²/r) = 균형추의 무게(m·g)';
+                solution.className = 'solution hidden';
+            }
+        }
+        
+        function startAnimation() {
+            const canvas = document.getElementById('simulationCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            angle = 0;
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const centerX = 250;
+                const centerY = 150;
+                const drawRadius = 90;
+                
+                // 회전판 (놀이기구 플랫폼) - 화려한 패턴
+                const platformGradient = ctx.createRadialGradient(centerX, centerY + 24, 0, centerX, centerY + 24, 200);
+                platformGradient.addColorStop(0, '#ff6b9d');
+                platformGradient.addColorStop(0.5, '#c44569');
+                platformGradient.addColorStop(1, '#a83256');
+                ctx.fillStyle = platformGradient;
+                ctx.beginPath();
+                ctx.moveTo(50, centerY + 20);
+                ctx.lineTo(450, centerY + 20);
+                ctx.lineTo(470, centerY + 40);
+                ctx.lineTo(30, centerY + 40);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 플랫폼 장식 패턴
+                ctx.strokeStyle = '#ffd93d';
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 360; i += 30) {
+                    const rad = (i * Math.PI) / 180;
+                    const x1 = centerX + 70 * Math.cos(rad);
+                    const y1 = centerY + 24;
+                    const x2 = centerX + 90 * Math.cos(rad);
+                    const y2 = centerY + 24;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }
+                
+                // 플랫폼 앞면
+                ctx.fillStyle = '#8b3a62';
+                ctx.fillRect(30, centerY + 40, 440, 8);
+                
+                // LED 조명 효과
+                for (let i = 50; i < 450; i += 40) {
+                    const lightColor = Math.sin(angle * 2 + i * 0.1) > 0 ? '#ffd93d' : '#ff6b9d';
+                    ctx.fillStyle = lightColor;
+                    ctx.beginPath();
+                    ctx.arc(i, centerY + 44, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // 중앙 구멍 (케이블 통과)
+                const holeX = centerX;
+                const holeY = centerY + 24;
+                
+                ctx.beginPath();
+                ctx.arc(holeX, holeY, 10, 0, Math.PI * 2);
+                ctx.fillStyle = '#2c3e50';
+                ctx.fill();
+                ctx.strokeStyle = '#34495e';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 구멍 테두리 장식
+                ctx.beginPath();
+                ctx.arc(holeX, holeY, 13, 0, Math.PI * 2);
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 궤도 경로 (점선)
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, drawRadius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // 곤돌라 위치
+                const gondolaX = centerX + drawRadius * Math.cos(angle);
+                const gondolaY = centerY + drawRadius * Math.sin(angle);
+                
+                // 케이블 (수평)
+                const cableGradient = ctx.createLinearGradient(gondolaX, gondolaY, holeX, holeY);
+                cableGradient.addColorStop(0, '#95a5a6');
+                cableGradient.addColorStop(1, '#7f8c8d');
+                ctx.beginPath();
+                ctx.moveTo(gondolaX, gondolaY);
+                ctx.lineTo(holeX, holeY);
+                ctx.strokeStyle = cableGradient;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // 곤돌라 (놀이기구 탑승칸)
+                ctx.save();
+                ctx.translate(gondolaX, gondolaY);
+                
+                // 곤돌라 그림자
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(-16, 12, 32, 4);
+                
+                // 곤돌라 몸체
+                const gondolaGradient = ctx.createLinearGradient(-18, -10, 18, 20);
+                gondolaGradient.addColorStop(0, '#3498db');
+                gondolaGradient.addColorStop(1, '#2980b9');
+                ctx.fillStyle = gondolaGradient;
+                ctx.fillRect(-18, -10, 36, 30);
+                
+                // 곤돌라 창문
+                ctx.fillStyle = '#ecf0f1';
+                ctx.fillRect(-14, -6, 28, 18);
+                
+                // 곤돌라 테두리
+                ctx.strokeStyle = '#1a5490';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-18, -10, 36, 30);
+                
+                // 곤돌라 상단 장식
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(-18, -10, 36, 4);
+                
+                // 승객 표시 (이모지 스타일)
+                ctx.fillStyle = '#34495e';
+                ctx.font = '20px Arial';
+                ctx.fillText('👤', -8, 10);
+                
+                ctx.restore();
+                
+                // 속도 벡터 (움직임 표시)
+                const velX = gondolaX - 45 * Math.sin(angle);
+                const velY = gondolaY + 45 * Math.cos(angle);
+                
+                const velGradient = ctx.createLinearGradient(gondolaX, gondolaY, velX, velY);
+                velGradient.addColorStop(0, '#27ae60');
+                velGradient.addColorStop(1, '#229954');
+                
+                ctx.beginPath();
+                ctx.moveTo(gondolaX, gondolaY);
+                ctx.lineTo(velX, velY);
+                ctx.strokeStyle = velGradient;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                const arrowAngle = angle + Math.PI / 2;
+                ctx.beginPath();
+                ctx.moveTo(velX, velY);
+                ctx.lineTo(velX - 10 * Math.cos(arrowAngle - 0.3), velY - 10 * Math.sin(arrowAngle - 0.3));
+                ctx.moveTo(velX, velY);
+                ctx.lineTo(velX - 10 * Math.cos(arrowAngle + 0.3), velY - 10 * Math.sin(arrowAngle + 0.3));
+                ctx.strokeStyle = '#229954';
+                ctx.stroke();
+                
+                // 균형추 바구니
+                const basketY = holeY + 90;
+                
+                // 케이블 (수직)
+                ctx.beginPath();
+                ctx.moveTo(holeX, holeY);
+                ctx.lineTo(holeX, basketY);
+                ctx.strokeStyle = '#7f8c8d';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // 바구니 (균형추)
+                const basketGradient = ctx.createLinearGradient(holeX - 20, basketY, holeX + 20, basketY + 40);
+                basketGradient.addColorStop(0, '#f39c12');
+                basketGradient.addColorStop(1, '#d68910');
+                
+                // 바구니 윗부분
+                ctx.fillStyle = basketGradient;
+                ctx.beginPath();
+                ctx.moveTo(holeX - 20, basketY);
+                ctx.lineTo(holeX - 15, basketY + 35);
+                ctx.lineTo(holeX + 15, basketY + 35);
+                ctx.lineTo(holeX + 20, basketY);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 바구니 테두리
+                ctx.strokeStyle = '#ba7f06';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(holeX - 20, basketY);
+                ctx.lineTo(holeX - 15, basketY + 35);
+                ctx.lineTo(holeX + 15, basketY + 35);
+                ctx.lineTo(holeX + 20, basketY);
+                ctx.closePath();
+                ctx.stroke();
+                
+                // 바구니 격자 무늬
+                ctx.strokeStyle = '#d68910';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(holeX - 18 + i * 4, basketY + 10);
+                    ctx.lineTo(holeX - 14 + i * 4, basketY + 30);
+                    ctx.stroke();
+                }
+                
+                // 라벨
+                ctx.font = 'bold 15px Malgun Gothic';
+                
+                // 곤돌라 라벨
+                ctx.fillStyle = '#2980b9';
+                ctx.fillText('곤돌라', gondolaX - 25, gondolaY - 25);
+                ctx.font = 'bold 13px Malgun Gothic';
+                ctx.fillStyle = '#333';
+                ctx.fillText(currentProblem.gondola + ' kg', gondolaX + 20, gondolaY - 25);
+                
+                // 속도 라벨
+                ctx.fillStyle = '#27ae60';
+                ctx.fillText(currentProblem.velocity + ' m/s', velX + 5, velY - 5);
+                
+                // 반지름 라벨
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillText('반지름 ' + currentProblem.radius + ' m', centerX + 10, centerY - drawRadius - 10);
+                
+                // 바구니 라벨
+                ctx.font = 'bold 15px Malgun Gothic';
+                ctx.fillStyle = '#f39c12';
+                ctx.fillText('균형추', holeX - 30, basketY + 20);
+                ctx.font = 'bold 13px Malgun Gothic';
+                ctx.fillText('? kg', holeX + 25, basketY + 20);
+                
+                // 장력 표시
+                ctx.fillStyle = '#7f8c8d';
+                ctx.fillText('T', holeX + 15, basketY - 45);
+                
+                // 중력 화살표
+                ctx.beginPath();
+                ctx.moveTo(holeX, basketY + 40);
+                ctx.lineTo(holeX, basketY + 65);
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(holeX, basketY + 65);
+                ctx.lineTo(holeX - 6, basketY + 55);
+                ctx.moveTo(holeX, basketY + 65);
+                ctx.lineTo(holeX + 6, basketY + 55);
+                ctx.stroke();
+                
+                ctx.font = 'bold 13px Malgun Gothic';
+                ctx.fillStyle = '#c0392b';
+                ctx.fillText('중력', holeX + 12, basketY + 60);
+                
+                angle += 0.025;
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        generateNewProblem();
+    </script>
+</body>
+</html>

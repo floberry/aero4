@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물리 문제 무한 학습 시뮬레이터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .stat-box .label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        .problem-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+        }
+        .problem-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .problem-text {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 16px;
+            border-left: 4px solid #667eea;
+        }
+        .problem-text strong {
+            color: #667eea;
+            font-size: 18px;
+        }
+        .simulation-canvas {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .answer-section {
+            margin-top: 20px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .input-group label {
+            font-weight: bold;
+            color: #555;
+            min-width: 120px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .input-group span {
+            color: #666;
+            font-weight: 500;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            display: block;
+        }
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+            display: block;
+        }
+        .feedback h3 {
+            margin-bottom: 10px;
+        }
+        .solution-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .hint-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        .hint-box.show {
+            display: block;
+        }
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .difficulty-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+        }
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .control-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .control-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 물리 문제 무한 학습 시뮬레이터</h1>
+            <p style="color: #666;">매번 다른 값으로 문제가 생성됩니다 - 반복 학습에 최적화!</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="label">문제 수</div>
+                <div class="value" id="totalProblems">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">정답</div>
+                <div class="value" id="correctCount">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">정답률</div>
+                <div class="value" id="accuracy">0%</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-level="easy">쉬움</button>
+            <button class="difficulty-btn" data-level="medium">보통</button>
+            <button class="difficulty-btn" data-level="hard">어려움</button>
+        </div>
+
+        <div class="main-content">
+            <div class="problem-section">
+                <h2>📝 문제</h2>
+                <div class="problem-text" id="problemText"></div>
+                
+                <div class="simulation-canvas" id="canvasContainer"></div>
+                
+                <div class="control-buttons">
+                    <button class="control-btn" id="playBtn">▶ 재생</button>
+                    <button class="control-btn" id="pauseBtn">⏸ 정지</button>
+                    <button class="control-btn" id="resetSimBtn">🔄 리셋</button>
+                </div>
+            </div>
+
+            <div class="problem-section">
+                <h2>✏️ 답안 작성</h2>
+                
+                <div class="answer-section">
+                    <div class="input-group">
+                        <label>물체 A 질량:</label>
+                        <input type="number" id="answerInput" step="0.01" placeholder="답을 입력하세요">
+                        <span>kg</span>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-primary" id="submitBtn">제출하기</button>
+                        <button class="btn-secondary" id="hintBtn">💡 힌트</button>
+                    </div>
+
+                    <div class="hint-box" id="hintBox">
+                        <strong>💡 힌트:</strong>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>구심력 공식: F = mv²/r</li>
+                            <li>물체 B의 구심력 = 실의 장력</li>
+                            <li>물체 A는 중력과 장력이 평형 상태</li>
+                            <li>m_A × g = T</li>
+                        </ol>
+                    </div>
+
+                    <div class="feedback" id="feedback"></div>
+
+                    <div class="button-group" style="margin-top: 30px;">
+                        <button class="btn-success" id="nextBtn">다음 문제 ➔</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 게임 상태
+        let gameState = {
+            totalProblems: 0,
+            correctCount: 0,
+            difficulty: 'easy',
+            currentProblem: null
+        };
+
+        // 난이도별 범위 설정
+        const difficultyRanges = {
+            easy: {
+                radius: [0.2, 0.5],
+                velocity: [1, 3],
+                mass: [0.5, 2]
+            },
+            medium: {
+                radius: [0.3, 0.8],
+                velocity: [2, 5],
+                mass: [1, 5]
+            },
+            hard: {
+                radius: [0.5, 1.5],
+                velocity: [3, 8],
+                mass: [2, 10]
+            }
+        };
+
+        // Three.js 설정
+        let scene, camera, renderer, objectB, objectA, velocityArrow, forceArrow;
+        let isAnimating = false;
+        let angle = 0;
+
+        function initThreeJS() {
+            const container = document.getElementById('canvasContainer');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(4, 3, 4);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // 조명
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            scene.add(directionalLight);
+
+            // 수평면
+            const planeGeometry = new THREE.CylinderGeometry(2.5, 2.5, 0.1, 32);
+            const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x2d3561, transparent: true, opacity: 0.8 });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            scene.add(plane);
+
+            // 중심 기둥
+            const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1.5, 16);
+            const poleMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+            pole.position.y = -0.75;
+            scene.add(pole);
+
+            // 물체 B
+            const bGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+            const bMaterial = new THREE.MeshPhongMaterial({ color: 0x667eea, emissive: 0x334488 });
+            objectB = new THREE.Mesh(bGeometry, bMaterial);
+            scene.add(objectB);
+
+            // 물체 A
+            const aGeometry = new THREE.SphereGeometry(0.18, 32, 32);
+            const aMaterial = new THREE.MeshPhongMaterial({ color: 0xff6b6b, emissive: 0x884444 });
+            objectA = new THREE.Mesh(aGeometry, aMaterial);
+            objectA.position.set(0, -1.3, 0);
+            scene.add(objectA);
+
+            // 화살표
+            velocityArrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0x4caf50, 0.2, 0.15);
+            scene.add(velocityArrow);
+
+            forceArrow = new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(0, 0, 0), 1, 0xff9800, 0.2, 0.15);
+            scene.add(forceArrow);
+
+            animate3D();
+        }
+
+        function animate3D() {
+            if (isAnimating && gameState.currentProblem) {
+                const omega = gameState.currentProblem.velocity / gameState.currentProblem.radius;
+                angle += omega * 0.016;
+                if (angle > Math.PI * 2) angle -= Math.PI * 2;
+            }
+
+            if (gameState.currentProblem) {
+                const r = gameState.currentProblem.radius * 2;
+                const bX = r * Math.cos(angle);
+                const bZ = r * Math.sin(angle);
+                objectB.position.set(bX, 0, bZ);
+
+                const vDir = new THREE.Vector3(-Math.sin(angle), 0, Math.cos(angle));
+                velocityArrow.position.copy(objectB.position);
+                velocityArrow.setDirection(vDir);
+
+                const fDir = new THREE.Vector3(-Math.cos(angle), 0, -Math.sin(angle));
+                forceArrow.position.copy(objectB.position);
+                forceArrow.setDirection(fDir);
+            }
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate3D);
+        }
+
+        function generateProblem() {
+            const range = difficultyRanges[gameState.difficulty];
+            
+            const radius = Math.random() * (range.radius[1] - range.radius[0]) + range.radius[0];
+            const velocity = Math.random() * (range.velocity[1] - range.velocity[0]) + range.velocity[0];
+            const massB = Math.random() * (range.mass[1] - range.mass[0]) + range.mass[0];
+            
+            const g = 10;
+            const centripetalForce = massB * velocity * velocity / radius;
+            const tension = centripetalForce;
+            const massA = tension / g;
+
+            return {
+                radius: Math.round(radius * 100) / 100,
+                velocity: Math.round(velocity * 100) / 100,
+                massB: Math.round(massB * 100) / 100,
+                g: g,
+                answer: Math.round(massA * 100) / 100
+            };
+        }
+
+        function displayProblem() {
+            const p = gameState.currentProblem;
+            document.getElementById('problemText').innerHTML = `
+                물체 A와 실로 연결된 물체 B가 마찰이 없는 수평면에서 
+                반지름이 <strong>${p.radius}m</strong>인 원궤도를 따라 
+                <strong>${p.velocity}m/s</strong>의 속력으로 등속 원운동을 한다.<br><br>
+                B의 질량은 <strong>${p.massB}kg</strong>이다. <strong>A의 질량은?</strong><br><br>
+                <span style="color: #666; font-size: 14px;">
+                (단, 중력 가속도는 ${p.g}m/s², 물체의 크기, 실의 질량은 무시한다.)
+                </span>
+            `;
+            
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('hintBox').classList.remove('show');
+            
+            angle = 0;
+            isAnimating = false;
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('answerInput').value);
+            const correctAnswer = gameState.currentProblem.answer;
+            const tolerance = 0.05;
+
+            gameState.totalProblems++;
+            
+            const isCorrect = Math.abs(userAnswer - correctAnswer) <= tolerance;
+            
+            if (isCorrect) {
+                gameState.correctCount++;
+            }
+
+            updateStats();
+            showFeedback(isCorrect, userAnswer, correctAnswer);
+        }
+
+        function showFeedback(isCorrect, userAnswer, correctAnswer) {
+            const feedback = document.getElementById('feedback');
+            const p = gameState.currentProblem;
+            
+            const F = p.massB * p.velocity * p.velocity / p.radius;
+            
+            if (isCorrect) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <h3>🎉 정답입니다!</h3>
+                    <div class="solution-detail">
+                        <p><strong>풀이 과정:</strong></p>
+                        <div class="formula">
+                            1. 구심력: F = m_B × v² / r = ${p.massB} × ${p.velocity}² / ${p.radius} = ${F.toFixed(2)} N
+                        </div>
+                        <div class="formula">
+                            2. 장력: T = F = ${F.toFixed(2)} N
+                        </div>
+                        <div class="formula">
+                            3. 물체 A: m_A = T / g = ${F.toFixed(2)} / ${p.g} = ${correctAnswer} kg
+                        </div>
+                        <p style="margin-top: 10px;">입력한 답: <strong>${userAnswer} kg</strong> ✓</p>
+                    </div>
+                `;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <h3>❌ 오답입니다</h3>
+                    <div class="solution-detail">
+                        <p>입력한 답: <strong>${userAnswer} kg</strong></p>
+                        <p>정답: <strong>${correctAnswer} kg</strong></p>
+                        <p style="margin-top: 15px;"><strong>풀이 과정:</strong></p>
+                        <div class="formula">
+                            1. 구심력: F = m_B × v² / r = ${p.massB} × ${p.velocity}² / ${p.radius} = ${F.toFixed(2)} N
+                        </div>
+                        <div class="formula">
+                            2. 장력: T = F = ${F.toFixed(2)} N
+                        </div>
+                        <div class="formula">
+                            3. 물체 A: m_A = T / g = ${F.toFixed(2)} / ${p.g} = ${correctAnswer} kg
+                        </div>
+                        <p style="margin-top: 10px; color: #856404;">💡 구심력 = 장력 = 물체 A의 무게</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalProblems').textContent = gameState.totalProblems;
+            document.getElementById('correctCount').textContent = gameState.correctCount;
+            const accuracy = gameState.totalProblems > 0 
+                ? Math.round((gameState.correctCount / gameState.totalProblems) * 100) 
+                : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function nextProblem() {
+            gameState.currentProblem = generateProblem();
+            displayProblem();
+        }
+
+        // 이벤트 리스너
+        document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+        document.getElementById('nextBtn').addEventListener('click', nextProblem);
+        document.getElementById('hintBtn').addEventListener('click', () => {
+            document.getElementById('hintBox').classList.toggle('show');
+        });
+
+        document.getElementById('playBtn').addEventListener('click', () => {
+            isAnimating = true;
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            isAnimating = false;
+        });
+
+        document.getElementById('resetSimBtn').addEventListener('click', () => {
+            angle = 0;
+            isAnimating = false;
+        });
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                gameState.difficulty = e.target.dataset.level;
+                nextProblem();
+            });
+        });
+
+        document.getElementById('answerInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // 초기화
+        initThreeJS();
+        nextProblem();
+    </script>
+</body>
+</html>

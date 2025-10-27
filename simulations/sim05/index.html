@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>돌림힘 퀴즈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #FF69B4;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .problem {
+            background: #FFF8DC;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            border: 3px solid #FFD700;
+        }
+        
+        .problem h2 {
+            color: #FF6347;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .problem p {
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 30px 0;
+            background: #E6F3FF;
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #87CEEB;
+        }
+        
+        canvas {
+            border-radius: 10px;
+        }
+        
+        .input-section {
+            margin: 20px 0;
+        }
+        
+        .input-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #FF6347;
+            font-size: 18px;
+        }
+        
+        .input-section input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 3px solid #FFB6C1;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-section input:focus {
+            outline: none;
+            border-color: #FF69B4;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #FF69B4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #FF1493;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.correct {
+            background: #D4EDDA;
+            border: 3px solid #28A745;
+            color: #155724;
+        }
+        
+        .result.incorrect {
+            background: #F8D7DA;
+            border: 3px solid #DC3545;
+            color: #721C24;
+        }
+        
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+        
+        .result p {
+            line-height: 1.8;
+            margin: 5px 0;
+            font-size: 15px;
+        }
+        
+        .attempts {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 20px;
+            color: #FF6347;
+            font-weight: bold;
+        }
+        
+        .reset-btn {
+            background: #6C757D;
+        }
+        
+        .reset-btn:hover {
+            background: #5A6268;
+        }
+
+        .hint-box {
+            background: #FFF3CD;
+            border: 2px solid #FFC107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hint-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .hint-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍰 돌림힘 퀴즈 - 케이크 먹기 게임 🍰</h1>
+        
+        <div class="problem">
+            <h2>📚 문제</h2>
+            <p>그림과 같이 길이 1 m인 자의 중앙을 실로 매단 후 물체 A를 자의 눈금 10 cm 되는 곳에 매달고, 무게 20 N인 물체 B를 눈금 80 cm 되는 곳에 매달았더니 물리량의 평형을 이루게 되었다.</p>
+            <br>
+            <p><strong>A의 무게는?</strong></p>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="700" height="400"></canvas>
+        </div>
+        
+        <div class="attempts">
+            남은 기회: <span id="attempts">3</span>/3 🎯
+        </div>
+        
+        <div class="input-section">
+            <label for="answer">정답을 적으시오 (단위: N)</label>
+            <input type="text" id="answer" placeholder="숫자만 입력하세요">
+        </div>
+        
+        <button onclick="checkAnswer()">제출하기 🎉</button>
+        <button class="reset-btn" onclick="resetGame()">다시 시작 🔄</button>
+        
+        <div id="result" class="result"></div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let attempts = 3;
+        let gameOver = false;
+        let cakeFalling = false;
+        let cakeFallY = 0;
+        
+        function drawScene(isCorrect, isFailed) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 배경
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            if (isFailed) {
+                gradient.addColorStop(0, '#D3D3D3');
+                gradient.addColorStop(1, '#E8E8E8');
+            } else {
+                gradient.addColorStop(0, '#E0F7FF');
+                gradient.addColorStop(1, '#FFF5F5');
+            }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 막대 (자)
+            ctx.fillStyle = '#D2691E';
+            ctx.fillRect(200, 100, 300, 10);
+            
+            // 중앙 줄
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(350, 50);
+            ctx.lineTo(350, 100);
+            ctx.stroke();
+            
+            // 막대 고정점
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(350, 50, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 눈금 표시
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('0cm', 195, 95);
+            ctx.fillText('50cm', 340, 95);
+            ctx.fillText('100cm', 480, 95);
+            
+            // A 위치 (10cm)
+            const posA = 230;
+            // B 위치 (80cm)
+            const posB = 440;
+            
+            // 음식 A (도넛) - 왼쪽
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(posA, 110);
+            ctx.lineTo(posA, 150);
+            ctx.stroke();
+            
+            drawDonut(posA, 165);
+            
+            // 라벨 A
+            ctx.fillStyle = '#FF6347';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('A', posA, 195);
+            
+            // 음식 B (케이크) - 오른쪽
+            let cakeY = 165;
+            if (isCorrect && cakeFalling) {
+                cakeY = 165 + cakeFallY;
+            }
+            
+            if (!isCorrect || !cakeFalling || cakeFallY < 100) {
+                if (!isCorrect || cakeFallY < 100) {
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(posB, 110);
+                    ctx.lineTo(posB, Math.min(150, cakeY - 15));
+                    ctx.stroke();
+                }
+                
+                drawCake(posB, cakeY);
+                
+                // 라벨 B
+                ctx.fillStyle = '#FF69B4';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('B (20N)', posB, cakeY + 35);
+            }
+            
+            // 사람 A - 왼쪽
+            const personAStatus = isFailed ? 'crying' : 'waiting';
+            drawPerson(posA, 310, personAStatus, '#FFB6C1');
+            
+            // 사람 B - 오른쪽
+            let personBStatus = 'waiting';
+            if (isFailed) {
+                personBStatus = 'crying';
+            } else if (isCorrect && cakeFalling && cakeFallY >= 100) {
+                personBStatus = 'happy';
+            }
+            drawPerson(posB, 310, personBStatus, '#87CEEB');
+            
+            // 정답일 때 하트 효과
+            if (isCorrect && cakeFalling && cakeFallY >= 100) {
+                drawHearts();
+            }
+            
+            // 실패했을 때 눈물 효과
+            if (isFailed) {
+                drawTears(posA, 310);
+                drawTears(posB, 310);
+            }
+        }
+        
+        function drawDonut(x, y) {
+            // 도넛 외부
+            ctx.fillStyle = '#FFB347';
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#FF8C00';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 도넛 구멍
+            ctx.fillStyle = '#FFF8DC';
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 초코 장식
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
+                const px = x + Math.cos(angle) * 15;
+                const py = y + Math.sin(angle) * 15;
+                ctx.fillStyle = '#8B4513';
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function drawCake(x, y) {
+            // 케이크 베이스
+            ctx.fillStyle = '#FFE4B5';
+            ctx.fillRect(x - 25, y - 15, 50, 30);
+            ctx.strokeStyle = '#DEB887';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 25, y - 15, 50, 30);
+            
+            // 크림
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.moveTo(x - 25, y - 15);
+            for (let i = 0; i <= 5; i++) {
+                const px = x - 25 + (50 / 5) * i;
+                const py = i % 2 === 0 ? y - 20 : y - 15;
+                ctx.lineTo(px, py);
+            }
+            ctx.fill();
+            ctx.stroke();
+            
+            // 딸기
+            ctx.fillStyle = '#FF6B6B';
+            ctx.beginPath();
+            ctx.arc(x, y - 5, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 딸기 꼭지
+            ctx.fillStyle = '#90EE90';
+            ctx.beginPath();
+            ctx.moveTo(x - 3, y - 8);
+            ctx.lineTo(x, y - 12);
+            ctx.lineTo(x + 3, y - 8);
+            ctx.fill();
+        }
+        
+        function drawPerson(x, y, status, color) {
+            // 몸통
+            ctx.fillStyle = color;
+            ctx.fillRect(x - 15, y, 30, 40);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - 15, y, 30, 40);
+            
+            // 머리
+            ctx.fillStyle = '#FFDAB9';
+            ctx.beginPath();
+            ctx.arc(x, y - 15, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // 눈
+            if (status === 'crying') {
+                // 우는 눈 (X 모양)
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x - 10, y - 20);
+                ctx.lineTo(x - 6, y - 16);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x - 6, y - 20);
+                ctx.lineTo(x - 10, y - 16);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x + 6, y - 20);
+                ctx.lineTo(x + 10, y - 16);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x + 10, y - 20);
+                ctx.lineTo(x + 6, y - 16);
+                ctx.stroke();
+            } else {
+                // 일반 눈
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(x - 8, y - 18, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x + 8, y - 18, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 입
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (status === 'happy') {
+                // 행복한 입 (웃음)
+                ctx.arc(x, y - 8, 10, 0.2, Math.PI - 0.2);
+            } else if (status === 'crying') {
+                // 우는 입 (역방향 아치)
+                ctx.arc(x, y - 2, 8, 1.2, Math.PI - 1.2, true);
+            } else {
+                // 기대하는 입 (벌림)
+                ctx.arc(x, y - 8, 8, 0.3, Math.PI - 0.3);
+            }
+            ctx.stroke();
+            
+            // 팔
+            ctx.strokeStyle = '#FFDAB9';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(x - 15, y + 10);
+            if (status === 'happy') {
+                ctx.lineTo(x - 25, y + 5);
+            } else if (status === 'crying') {
+                ctx.lineTo(x - 20, y - 5);
+            } else {
+                ctx.lineTo(x - 25, y + 20);
+            }
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 15, y + 10);
+            if (status === 'happy') {
+                ctx.lineTo(x + 25, y + 5);
+            } else if (status === 'crying') {
+                ctx.lineTo(x + 20, y - 5);
+            } else {
+                ctx.lineTo(x + 25, y + 20);
+            }
+            ctx.stroke();
+            
+            // 다리
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(x - 8, y + 40);
+            ctx.lineTo(x - 8, y + 60);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 8, y + 40);
+            ctx.lineTo(x + 8, y + 60);
+            ctx.stroke();
+        }
+        
+        function drawHearts() {
+            const hearts = [
+                {x: 100, y: 100}, {x: 600, y: 120}, {x: 150, y: 200},
+                {x: 550, y: 180}, {x: 350, y: 320}
+            ];
+            
+            hearts.forEach(heart => {
+                ctx.fillStyle = '#FF69B4';
+                ctx.beginPath();
+                ctx.moveTo(heart.x, heart.y + 5);
+                ctx.bezierCurveTo(heart.x, heart.y, heart.x - 5, heart.y - 5, heart.x - 10, heart.y - 5);
+                ctx.bezierCurveTo(heart.x - 15, heart.y - 5, heart.x - 15, heart.y + 2, heart.x - 15, heart.y + 2);
+                ctx.bezierCurveTo(heart.x - 15, heart.y + 7, heart.x - 10, heart.y + 12, heart.x, heart.y + 17);
+                ctx.bezierCurveTo(heart.x + 10, heart.y + 12, heart.x + 15, heart.y + 7, heart.x + 15, heart.y + 2);
+                ctx.bezierCurveTo(heart.x + 15, heart.y + 2, heart.x + 15, heart.y - 5, heart.x + 10, heart.y - 5);
+                ctx.bezierCurveTo(heart.x + 5, heart.y - 5, heart.x, heart.y, heart.x, heart.y + 5);
+                ctx.fill();
+            });
+        }
+        
+        function drawTears(x, y) {
+            // 눈물 방울
+            ctx.fillStyle = '#4DB8FF';
+            ctx.beginPath();
+            ctx.arc(x - 12, y - 8, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x - 12, y - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 12, y - 8, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 12, y - 2, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function animateCakeFall() {
+            if (cakeFallY < 150) {
+                cakeFallY += 5;
+                drawScene(true, false);
+                requestAnimationFrame(animateCakeFall);
+            }
+        }
+        
+        function checkAnswer() {
+            if (gameOver) return;
+            
+            const answer = document.getElementById('answer').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (answer === '') {
+                alert('답을 입력해주세요!');
+                return;
+            }
+            
+            if (answer === '15') {
+                resultDiv.className = 'result correct';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h3>🎉 정답입니다! 케이크를 먹었어요! 🍰</h3>
+                    <p><strong>풀이:</strong></p>
+                    <p>• 돌림힘 = 힘 × 회전축으로부터의 거리</p>
+                    <p>• 막대의 중심(50cm)이 받침점입니다.</p>
+                    <p>• A의 위치: 10cm → 중심에서 40cm = 0.4m 떨어짐</p>
+                    <p>• B의 위치: 80cm → 중심에서 30cm = 0.3m 떨어짐</p>
+                    <p>• 평형 조건: A의 돌림힘 = B의 돌림힘</p>
+                    <p>• A × 0.4 = 20 × 0.3</p>
+                    <p>• A × 0.4 = 6</p>
+                    <p>• A = 6 ÷ 0.4</p>
+                    <p>• <strong>A = 15 N</strong></p>
+                `;
+                cakeFalling = true;
+                cakeFallY = 0;
+                animateCakeFall();
+                gameOver = true;
+            } else {
+                attempts--;
+                document.getElementById('attempts').textContent = attempts;
+                
+                if (attempts === 0) {
+                    resultDiv.className = 'result incorrect';
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <h3>😢 모든 기회를 소진했습니다!</h3>
+                        <p><strong>정답: 15 N</strong></p>
+                        <p><strong>풀이:</strong></p>
+                        <p>• 막대의 중앙(50cm)이 받침점입니다.</p>
+                        <p>• A의 위치: 10cm → 중심에서 40cm(0.4m) 떨어짐</p>
+                        <p>• B의 위치: 80cm → 중심에서 30cm(0.3m) 떨어짐</p>
+                        <p>• 평형 조건: A × 0.4 = 20 × 0.3</p>
+                        <p>• A × 0.4 = 6</p>
+                        <p>• A = 6 ÷ 0.4 = <strong>15 N</strong></p>
+                    `;
+                    gameOver = true;
+                    drawScene(false, true);
+                } else {
+                    resultDiv.className = 'result incorrect';
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <h3>❌ 틀렸습니다!</h3>
+                        <p><strong>힌트:</strong> 돌림힘 = 힘 × 회전축으로부터의 거리</p>
+                        <p>• 막대의 중심(50cm)이 받침점입니다.</p>
+                        <p>• A는 중심에서 40cm(0.4m) 떨어져 있습니다.</p>
+                        <p>• B는 중심에서 30cm(0.3m) 떨어져 있습니다.</p>
+                        <p>• 평형 조건: A × 0.4 = 20 × 0.3</p>
+                        <p>• 계산을 다시 확인해보세요!</p>
+                        <p>남은 기회: ${attempts}번 🎯</p>
+                    `;
+                }
+                drawScene(false, false);
+            }
+        }
+        
+        function resetGame() {
+            attempts = 3;
+            gameOver = false;
+            cakeFalling = false;
+            cakeFallY = 0;
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('answer').value = '';
+            document.getElementById('result').style.display = 'none';
+            drawScene(false, false);
+        }
+        
+        // 엔터키로 제출
+        document.getElementById('answer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // 초기 그리기
+        drawScene(false, false);
+    </script>
+</body>
+</html>
