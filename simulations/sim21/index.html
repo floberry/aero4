@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전자기 유도 문제 연습</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .difficulty-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .difficulty-section h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .difficulty-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 3px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .difficulty-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .difficulty-btn.active {
+            background: white;
+            color: #f5576c;
+        }
+        
+        .problem-section {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .problem-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            max-width: 100%;
+        }
+        
+        .values {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 2;
+            font-size: 16px;
+        }
+        
+        .values strong {
+            color: #667eea;
+        }
+        
+        .question {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        .input-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            font-weight: bold;
+            min-width: 100px;
+            color: #333;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .new-problem-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .new-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .check-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+        
+        .hint-btn {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #2d3436;
+        }
+        
+        .hint-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(253, 203, 110, 0.4);
+        }
+        
+        .hint {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: none;
+            background: #fff9e6;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+            animation: slideIn 0.5s;
+        }
+        
+        .hint.show {
+            display: block;
+        }
+        
+        .hint-content {
+            line-height: 1.8;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+            animation: slideIn 0.5s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+            display: block;
+        }
+        
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+            display: block;
+        }
+        
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            font-weight: normal;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ 전자기 유도 문제 연습</h1>
+        
+        <div class="difficulty-section">
+            <h3>📊 난이도 선택</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" onclick="setDifficulty('easy')">쉬움 (정수)</button>
+                <button class="difficulty-btn active" onclick="setDifficulty('medium')">보통 (소수 1자리)</button>
+                <button class="difficulty-btn" onclick="setDifficulty('hard')">어려움 (소수 2자리)</button>
+            </div>
+        </div>
+        
+        <div class="problem-section">
+            <div class="problem-title">자기장 속 도선의 운동과 유도 기전력</div>
+            
+            <div class="diagram">
+                <canvas id="emCanvas" width="500" height="350"></canvas>
+            </div>
+            
+            <div class="values" id="problemValues"></div>
+            
+            <div class="question">
+                도선에 흐르는 전류의 세기 I는 몇 A인가?
+            </div>
+            
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="answer">전류 I:</label>
+                    <input type="number" id="answer" step="0.01" placeholder="답을 입력하세요 (단위: A)">
+                    <span>A</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="new-problem-btn" onclick="generateNewProblem()">🔄 새 문제</button>
+                    <button class="hint-btn" onclick="showHint()">💡 힌트 보기</button>
+                    <button class="check-btn" onclick="checkAnswer()">✓ 정답 확인</button>
+                </div>
+                
+                <div id="hint" class="hint"></div>
+                <div id="feedback" class="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = {};
+        let difficulty = 'medium';
+        
+        function setDifficulty(level) {
+            difficulty = level;
+            
+            const buttons = document.querySelectorAll('.difficulty-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            generateNewProblem();
+        }
+        
+        function generateNewProblem() {
+            let B, l, v, R;
+            
+            if (difficulty === 'easy') {
+                const possibleB = [1, 2, 4, 5];
+                const possibleL = [0.5, 1];
+                const possibleV = [2, 4, 5, 10];
+                const possibleR = [1, 2, 4, 5, 10];
+                
+                B = possibleB[Math.floor(Math.random() * possibleB.length)];
+                l = possibleL[Math.floor(Math.random() * possibleL.length)];
+                v = possibleV[Math.floor(Math.random() * possibleV.length)];
+                
+                const emf = B * l * v;
+                
+                const divisors = [1, 2, 4, 5, 10].filter(r => emf % r === 0);
+                R = divisors[Math.floor(Math.random() * divisors.length)] || 1;
+                
+            } else if (difficulty === 'medium') {
+                const possibleB = [0.2, 0.4, 0.5, 1.0, 2.0];
+                const possibleL = [0.5, 1.0, 2.0];
+                const possibleV = [2, 4, 5, 10];
+                const possibleR = [0.5, 1, 2, 4, 5];
+                
+                B = possibleB[Math.floor(Math.random() * possibleB.length)];
+                l = possibleL[Math.floor(Math.random() * possibleL.length)];
+                v = possibleV[Math.floor(Math.random() * possibleV.length)];
+                
+                const emf = B * l * v;
+                
+                const suitableR = [0.5, 1, 2, 4, 5].filter(r => {
+                    const result = emf / r;
+                    return result === Math.round(result * 10) / 10;
+                });
+                
+                R = suitableR.length > 0 
+                    ? suitableR[Math.floor(Math.random() * suitableR.length)]
+                    : possibleR[Math.floor(Math.random() * possibleR.length)];
+                
+            } else {
+                const possibleB = [0.15, 0.25, 0.35, 0.48, 0.52, 0.75];
+                const possibleL = [0.25, 0.4, 0.6, 0.8, 1.2];
+                const possibleV = [3, 5, 6, 8, 12];
+                const possibleR = [1.5, 2.5, 3, 4.5, 6];
+                
+                B = possibleB[Math.floor(Math.random() * possibleB.length)];
+                l = possibleL[Math.floor(Math.random() * possibleL.length)];
+                v = possibleV[Math.floor(Math.random() * possibleV.length)];
+                R = possibleR[Math.floor(Math.random() * possibleR.length)];
+            }
+            
+            currentProblem = { B, l, v, R };
+            
+            const emf = currentProblem.B * currentProblem.l * currentProblem.v;
+            const I = emf / currentProblem.R;
+            currentProblem.answer = I;
+            
+            displayProblem();
+            drawDiagram();
+            document.getElementById('answer').value = '';
+            document.getElementById('hint').classList.remove('show');
+            document.getElementById('feedback').style.display = 'none';
+        }
+        
+        function displayProblem() {
+            const html = `
+                <strong>자기장의 세기 B:</strong> ${currentProblem.B} T<br>
+                <strong>도선의 길이 l:</strong> ${currentProblem.l} m<br>
+                <strong>도선의 속력 v:</strong> ${currentProblem.v} m/s<br>
+                <strong>저항 R:</strong> ${currentProblem.R} Ω<br>
+                <br>
+                <em>※ 자기장은 지면에서 수직으로 나오는 방향 (⊙)</em>
+            `;
+            document.getElementById('problemValues').innerHTML = html;
+        }
+        
+        function drawDiagram() {
+            const canvas = document.getElementById('emCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#e8f4f8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for(let x = 30; x < canvas.width; x += 40) {
+                for(let y = 30; y < canvas.height; y += 40) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#2196F3';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#2196F3';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(100, 150);
+            ctx.lineTo(450, 150);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(100, 250);
+            ctx.lineTo(450, 250);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#f44336';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(100, 150);
+            ctx.lineTo(100, 180);
+            for(let i = 0; i < 4; i++) {
+                ctx.lineTo(115, 180 + i * 17.5);
+                ctx.lineTo(85, 180 + (i + 0.5) * 17.5);
+            }
+            ctx.lineTo(100, 250);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#f44336';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('R', 65, 205);
+            
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(300, 150);
+            ctx.lineTo(300, 250);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#FF9800';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(300, 200);
+            ctx.lineTo(380, 200);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(380, 200);
+            ctx.lineTo(365, 190);
+            ctx.moveTo(380, 200);
+            ctx.lineTo(365, 210);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('v', 395, 205);
+            ctx.fillText('l', 310, 200);
+            
+            ctx.font = 'bold 16px Arial';
+            ctx.fillStyle = '#2196F3';
+            ctx.fillText('B (⊙)', 20, 30);
+            
+            ctx.strokeStyle = '#9C27B0';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(300, 250);
+            ctx.lineTo(200, 250);
+            ctx.moveTo(200, 250);
+            ctx.lineTo(200, 150);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            ctx.fillStyle = '#9C27B0';
+            ctx.font = '14px Arial';
+            ctx.fillText('I', 320, 240);
+        }
+        
+        function showHint() {
+            const hintDiv = document.getElementById('hint');
+            
+            if (hintDiv.classList.contains('show')) {
+                hintDiv.classList.remove('show');
+                return;
+            }
+            
+            const emf = currentProblem.B * currentProblem.l * currentProblem.v;
+            const emfStr = emf.toFixed(2);
+            
+            let hintHTML = `
+                <div class="hint-content">
+                    <strong>💡 힌트</strong><br><br>
+                    <strong>1단계: 유도 기전력 구하기</strong><br>
+                    • 공식: ε = B × l × v<br>
+                    • 주어진 값: B = ${currentProblem.B} T, l = ${currentProblem.l} m, v = ${currentProblem.v} m/s<br>
+            `;
+            
+            if (difficulty === 'easy') {
+                hintHTML += `
+                    • 계산: ε = ${currentProblem.B} × ${currentProblem.l} × ${currentProblem.v} = ${emfStr} V<br><br>
+                    <strong>2단계: 전류 구하기</strong><br>
+                    • 옴의 법칙: I = ε ÷ R<br>
+                    • 이제 계산해보세요!
+                `;
+            } else {
+                hintHTML += `
+                    • 먼저 이 세 값을 곱해보세요<br><br>
+                    <strong>2단계: 전류 구하기</strong><br>
+                    • 옴의 법칙: I = ε ÷ R<br>
+                    • 1단계에서 구한 ε를 저항 R로 나누세요
+                `;
+            }
+            
+            hintHTML += `
+                </div>
+            `;
+            
+            hintDiv.innerHTML = hintHTML;
+            hintDiv.classList.add('show');
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseFloat(document.getElementById('answer').value);
+            const correctAnswer = currentProblem.answer;
+            const feedbackDiv = document.getElementById('feedback');
+            
+            if(isNaN(userAnswer)) {
+                feedbackDiv.className = 'feedback incorrect';
+                feedbackDiv.innerHTML = '❌ 답을 입력해주세요!';
+                feedbackDiv.style.display = 'block';
+                return;
+            }
+            
+            const tolerance = 0.05;
+            const isCorrect = Math.abs(userAnswer - correctAnswer) <= tolerance;
+            
+            const emf = currentProblem.B * currentProblem.l * currentProblem.v;
+            const emfRounded = Math.round(emf * 100) / 100;
+            const answerRounded = Math.round(correctAnswer * 100) / 100;
+            
+            const emfStr = emfRounded.toFixed(2);
+            const answerStr = answerRounded.toFixed(2);
+            
+            if(isCorrect) {
+                feedbackDiv.className = 'feedback correct';
+                feedbackDiv.innerHTML = `
+                    ✅ 정답입니다!
+                    <div class="explanation">
+                        <strong>풀이:</strong><br>
+                        1. 유도 기전력: ε = Blv = ${currentProblem.B} × ${currentProblem.l} × ${currentProblem.v} = ${emfStr} V<br>
+                        2. 전류: I = ε/R = ${emfStr} / ${currentProblem.R} = ${answerStr} A
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    generateNewProblem();
+                }, 2000);
+                
+            } else {
+                feedbackDiv.className = 'feedback incorrect';
+                feedbackDiv.innerHTML = `
+                    ❌ 틀렸습니다!
+                    <div class="explanation">
+                        <strong>📝 정답:</strong> I = ${answerStr} A<br><br>
+                        <strong>풀이 과정:</strong><br>
+                        <strong>1단계:</strong> 유도 기전력 구하기<br>
+                        • 공식: ε = B × l × v<br>
+                        • 계산: ε = ${currentProblem.B} × ${currentProblem.l} × ${currentProblem.v} = ${emfStr} V<br><br>
+                        <strong>2단계:</strong> 전류 구하기<br>
+                        • 옴의 법칙: I = ε ÷ R<br>
+                        • 계산: I = ${emfStr} ÷ ${currentProblem.R} = ${answerStr} A<br><br>
+                        <strong>📌 핵심 개념:</strong><br>
+                        • 자기장 속에서 도선이 움직이면 전자기 유도 현象으로 유도 기전력이 발생합니다.<br>
+                        • 유도 기전력의 크기는 자기장의 세기(B), 도선의 길이(l), 속력(v)에 비례합니다.
+                    </div>
+                `;
+            }
+        }
+        
+        generateNewProblem();
+    </script>
+</body>
+</html>

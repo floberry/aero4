@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물리학2 돌림힘 평형 문제</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .page {
+            display: none;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .character {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .character-body {
+            width: 80px;
+            height: 100px;
+            background: #4a90e2;
+            border-radius: 40px 40px 20px 20px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .character-head {
+            width: 60px;
+            height: 60px;
+            background: #ffd4a3;
+            border-radius: 50%;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #333;
+        }
+        
+        .character-eyes {
+            display: flex;
+            justify-content: space-around;
+            width: 40px;
+            margin: 20px auto 0;
+        }
+        
+        .eye {
+            width: 8px;
+            height: 8px;
+            background: #333;
+            border-radius: 50%;
+        }
+        
+        .sad-mouth {
+            width: 20px;
+            height: 10px;
+            border: 2px solid #333;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            margin: 5px auto;
+            transform: rotate(180deg);
+        }
+        
+        .happy-mouth {
+            width: 20px;
+            height: 10px;
+            border: 2px solid #333;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+            margin: 5px auto;
+        }
+        
+        .speech-bubble {
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 400px;
+            position: relative;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .speech-bubble:before {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #333;
+        }
+        
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 17px solid #fff;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+            position: relative;
+            z-index: 100;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        .problem-container {
+            text-align: left;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .problem-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .diagram {
+            margin: 30px auto;
+            text-align: center;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .diagram svg {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .answer-input {
+            width: 200px;
+            padding: 10px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin: 20px 10px;
+            text-align: center;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .solution-box {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+            text-align: left;
+            line-height: 1.8;
+        }
+        
+        .solution-box.show {
+            display: block;
+        }
+        
+        .solution-box h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .crown {
+            font-size: 100px;
+            margin: 20px;
+        }
+        
+        .final-character {
+            font-size: 150px;
+            margin: 20px;
+        }
+        
+        .formula {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px auto;
+            border-left: 4px solid #2196f3;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page 1: 시작 페이지 -->
+        <div class="page active" id="page1">
+            <h1>당신은 고등학교 물리학2를 수강하는<br>물리 반장입니다.<br>물리 문제로 어려워하고 있는 친구를<br>도와줘 능력을 증명해주세요!</h1>
+            <button onclick="nextPage(2)">시작</button>
+        </div>
+        
+        <!-- Page 2: 학생 등장 -->
+        <div class="page" id="page2">
+            <div class="character">
+                <div class="character-body">
+                    <div class="character-head">
+                        <div class="character-eyes">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                        <div class="sad-mouth"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="speech-bubble">
+                문제를 못 풀겠어 ㅠㅠ
+            </div>
+            <button onclick="nextPage(3)">도와주기</button>
+        </div>
+        
+        <!-- Page 3: 문제 페이지 -->
+        <div class="page" id="page3">
+            <h1 style="font-size: 1.5em;">문제를 풀어보세요!</h1>
+            <div class="problem-container">
+                <div class="problem-text">
+                    <strong>문제:</strong> 그림과 같이 무게가 <span id="weight"></span> N인 물체가 왼쪽 끝으로부터 거리 <span id="leftDistText"></span>L인 곳에 매달려 있고 막대의 오른쪽 끝이 수평을 유지하고 있다.
+                    <br><br>
+                    <strong>W는 몇 N인가?</strong>
+                    <br>
+                    (단, 막대의 길이는 <span id="totalDistText"></span>L이고 막대의 무게는 무시한다.)
+                </div>
+                
+                <div class="diagram">
+                    <svg width="550" height="280" viewBox="0 0 550 280" style="margin: 0 auto; display: block;">
+                        <!-- 지지점 -->
+                        <line x1="275" y1="60" x2="275" y2="110" stroke="#333" stroke-width="3"/>
+                        <circle cx="275" cy="60" r="6" fill="#333"/>
+                        
+                        <!-- 막대 -->
+                        <rect x="75" y="105" width="400" height="12" fill="#8b4513" stroke="#333" stroke-width="2" rx="3"/>
+                        
+                        <!-- 왼쪽 물체 줄 -->
+                        <line x1="175" y1="117" x2="175" y2="170" stroke="#333" stroke-width="2"/>
+                        
+                        <!-- 왼쪽 물체 -->
+                        <rect x="155" y="170" width="40" height="35" fill="#e74c3c" stroke="#333" stroke-width="2" rx="3"/>
+                        <text x="175" y="192" font-size="12" font-weight="bold" fill="white" text-anchor="middle" id="weightLabel">20N</text>
+                        
+                        <!-- 오른쪽 물체 줄 -->
+                        <line x1="475" y1="117" x2="475" y2="170" stroke="#333" stroke-width="2"/>
+                        
+                        <!-- 오른쪽 물체 -->
+                        <rect x="455" y="170" width="40" height="35" fill="#3498db" stroke="#333" stroke-width="2" rx="3"/>
+                        <text x="469" y="193" font-size="14" font-weight="bold" fill="white">W</text>
+                        
+                        <!-- 거리 표시 L -->
+                        <line x1="75" y1="90" x2="175" y2="90" stroke="#f39c12" stroke-width="2"/>
+                        <line x1="75" y1="85" x2="75" y2="95" stroke="#f39c12" stroke-width="2"/>
+                        <line x1="175" y1="85" x2="175" y2="95" stroke="#f39c12" stroke-width="2"/>
+                        <text x="120" y="85" font-size="16" font-weight="bold" fill="#f39c12" id="leftDistLabel">L</text>
+                        
+                        <!-- 거리 표시 3L -->
+                        <line x1="175" y1="135" x2="475" y2="135" stroke="#27ae60" stroke-width="2"/>
+                        <line x1="175" y1="130" x2="175" y2="140" stroke="#27ae60" stroke-width="2"/>
+                        <line x1="475" y1="130" x2="475" y2="140" stroke="#27ae60" stroke-width="2"/>
+                        <text x="315" y="155" font-size="16" font-weight="bold" fill="#27ae60" id="rightDistLabel">3L</text>
+                        
+                        <!-- 회전 중심 표시 -->
+                        <circle cx="275" cy="111" r="4" fill="#e74c3c"/>
+                    </svg>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <label for="answer"><strong>답:</strong></label>
+                    <input type="text" id="answer" class="answer-input" placeholder="숫자만 입력" inputmode="decimal">
+                    <strong>N</strong>
+                </div>
+                
+                <div>
+                    <button onclick="checkAnswer()">정답 확인</button>
+                    <button onclick="generateNewProblem()" style="background: #27ae60;">새 문제</button>
+                </div>
+                
+                <div class="feedback" id="feedback"></div>
+                
+                <div class="solution-box" id="solutionBox">
+                    <h3>✓ 풀이</h3>
+                    <div id="solutionContent"></div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button onclick="nextPage(4)" id="confirmButton" style="display: none;">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page 4: 감사 페이지 -->
+        <div class="page" id="page4">
+            <div class="character">
+                <div class="character-body">
+                    <div class="character-head">
+                        <div class="character-eyes">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                        <div class="happy-mouth"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="speech-bubble">
+                고마워!<br>
+                <div class="formula" style="margin-top: 15px; font-size: 0.8em;">
+                    <strong>돌림힘 평형 공식</strong><br>
+                    F₁ × r₁ = F₂ × r₂
+                </div>
+                이구나!
+            </div>
+            <button onclick="nextPage(5)">다음</button>
+        </div>
+        
+        <!-- Page 5: 최종 페이지 -->
+        <div class="page" id="page5">
+            <h1 style="font-size: 2.5em; color: #f39c12;">물리 반장 칭호를 지켜냈다!</h1>
+            <div class="crown">👑</div>
+            <div class="final-character">👍</div>
+            <h2 style="color: #667eea; margin-top: 20px;">축하합니다!</h2>
+            <button onclick="restartGame()">다른 친구 도와주러 가기</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentAnswer = 60;
+        let weight1 = 20;
+        let leftDist = 1;
+        let rightDist = 3;
+        
+        function initializeProblem() {
+            generateNewProblem();
+        }
+        
+        function generateNewProblem() {
+            // 거리 배수 랜덤 생성 (1배, 2배, 3배, 4배)
+            const multiplier = Math.floor(Math.random() * 4 + 1); // 1, 2, 3, 4
+            leftDist = 1 * multiplier;
+            rightDist = 3 * multiplier;
+            
+            // 왼쪽 물체 무게 랜덤 생성
+            // 답이 자연수가 되려면: weight1 / 2 가 자연수여야 함
+            // 따라서 weight1은 짝수여야 함
+            weight1 = Math.floor(Math.random() * 5 + 1) * 10; // 10, 20, 30, 40, 50
+            
+            // 정답 계산
+            const distFromLeft = ((leftDist + rightDist) / 2) - leftDist;
+            const distFromRight = rightDist - distFromLeft;
+            
+            // weight1 × distFromLeft = W × distFromRight
+            currentAnswer = (weight1 * distFromLeft) / distFromRight;
+            
+            // 화면 업데이트
+            document.getElementById('weight').textContent = weight1;
+            document.getElementById('weightLabel').textContent = weight1 + 'N';
+            document.getElementById('leftDistLabel').textContent = leftDist + 'L';
+            document.getElementById('rightDistLabel').textContent = rightDist + 'L';
+            document.getElementById('leftDistText').textContent = leftDist;
+            document.getElementById('totalDistText').textContent = leftDist + rightDist;
+            
+            // 입력 및 피드백 초기화
+            document.getElementById('answer').value = '';
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('solutionBox').classList.remove('show');
+            document.getElementById('confirmButton').style.display = 'none';
+        }
+        
+        function nextPage(pageNum) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById('page' + pageNum).classList.add('active');
+        }
+        
+        function checkAnswer() {
+            const answer = document.getElementById('answer').value;
+            const feedback = document.getElementById('feedback');
+            const solutionBox = document.getElementById('solutionBox');
+            
+            if (answer === '') {
+                feedback.textContent = '답을 입력해주세요!';
+                feedback.className = 'feedback show incorrect';
+                solutionBox.classList.remove('show');
+                return;
+            }
+            
+            const numAnswer = parseFloat(answer);
+            
+            if (Math.abs(numAnswer - currentAnswer) < 0.5) {
+                feedback.textContent = '정답입니다! 🎉 잘했어요!';
+                feedback.className = 'feedback show correct';
+                
+                const totalDist = leftDist + rightDist;
+                const pivotPos = totalDist / 2;
+                const distFromLeft = pivotPos - leftDist;
+                const distFromRight = rightDist - distFromLeft;
+                
+                // 풀이 표시
+                const solutionContent = document.getElementById('solutionContent');
+                solutionContent.innerHTML = `
+                    <strong>1단계: 주어진 정보 정리</strong><br>
+                    • 막대의 총 길이: ${totalDist}L<br>
+                    • 왼쪽 물체의 무게: ${weight1} N (왼쪽 끝에서 ${leftDist}L만큼 떨어진 곳에 위치)<br>
+                    • 오른쪽 물체 W (오른쪽 끝에 위치)<br>
+                    • 회전축: 막대가 수평을 유지하는 위치 (막대의 중앙, 왼쪽 끝에서 ${pivotPos}L)<br><br>
+                    
+                    <strong>2단계: 회전축으로부터의 거리 분석</strong><br>
+                    • 회전축 위치 = (${leftDist}L + ${rightDist}L) ÷ 2 = ${pivotPos}L (왼쪽 끝 기준)<br>
+                    • 회전축으로부터 왼쪽 물체까지의 거리 = ${pivotPos}L - ${leftDist}L = ${distFromLeft}L<br>
+                    • 회전축으로부터 오른쪽 물체까지의 거리 = ${rightDist}L - ${distFromLeft}L = ${distFromRight}L<br><br>
+                    
+                    <strong>3단계: 돌림힘 평형 조건 적용</strong><br>
+                    시계 방향 돌림힘 = 반시계 방향 돌림힘<br>
+                    ${weight1} N × ${distFromLeft}L = W × ${distFromRight}L<br><br>
+                    
+                    <strong>4단계: 계산</strong><br>
+                    W = (${weight1} N × ${distFromLeft}L) ÷ ${distFromRight}L<br>
+                    W = ${weight1} N ÷ ${distFromRight / distFromLeft}<br>
+                    W = ${currentAnswer} N<br><br>
+                    
+                    <strong>핵심 개념:</strong> 돌림힘 평형에서는 회전축을 중심으로 양쪽의 (힘 × 거리)가 같아야 합니다.
+                `;
+                solutionBox.classList.add('show');
+                document.getElementById('confirmButton').style.display = 'inline-block';
+            } else {
+                feedback.textContent = '틀렸습니다. 다시 시도해보세요!';
+                feedback.className = 'feedback show incorrect';
+                solutionBox.classList.remove('show');
+            }
+        }
+        
+        function restartGame() {
+            nextPage(1);
+            setTimeout(() => {
+                generateNewProblem();
+            }, 500);
+        }
+        
+        document.getElementById('answer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // 페이지 로드 시 첫 문제 생성
+        window.addEventListener('load', initializeProblem);
+    </script>
+</body>
+</html>
